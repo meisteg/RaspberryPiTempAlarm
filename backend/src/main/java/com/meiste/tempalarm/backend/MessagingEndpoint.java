@@ -1,9 +1,18 @@
 /*
-   For step-by-step instructions on connecting your Android application to this backend module,
-   see "App Engine Backend with Google Cloud Messaging" template documentation at
-   https://github.com/GoogleCloudPlatform/gradle-appengine-templates/tree/master/GcmEndpoints
-*/
-
+ * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.meiste.tempalarm.backend;
 
 import com.google.android.gcm.server.Constants;
@@ -35,10 +44,7 @@ import static com.meiste.tempalarm.backend.OfyService.ofy;
 public class MessagingEndpoint {
     private static final Logger log = Logger.getLogger(MessagingEndpoint.class.getName());
 
-    /**
-     * Api Keys can be obtained from the google cloud console
-     */
-    private static final String API_KEY = System.getProperty("gcm.api.key");
+    private static final String SETTING_GCM_API_KEY = "gcm.api.key";
 
     /**
      * Send to the first 10 devices (You can modify this to send to any number of devices or a specific device)
@@ -54,7 +60,7 @@ public class MessagingEndpoint {
         if (message.length() > 1000) {
             message = message.substring(0, 1000) + "[...]";
         }
-        Sender sender = new Sender(API_KEY);
+        Sender sender = new Sender(getApiKey());
         Message msg = new Message.Builder().addData("message", message).build();
         List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).limit(10).list();
         for (RegistrationRecord record : records) {
@@ -79,5 +85,20 @@ public class MessagingEndpoint {
                 }
             }
         }
+    }
+
+    private String getApiKey() {
+        SettingRecord setting = ofy().load().type(SettingRecord.class)
+                .filter("name", SETTING_GCM_API_KEY).first().now();
+        if (setting == null) {
+            setting = new SettingRecord();
+            setting.setName(SETTING_GCM_API_KEY);
+            setting.setValue("replace_this_text_with_the_real_API_Key");
+            ofy().save().entity(setting).now();
+
+            log.severe("Created fake GCM API key! Please go to App Engine admin console, "
+                    + "change its value to your API Key, then restart the server!");
+        }
+        return setting.getValue();
     }
 }

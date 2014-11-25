@@ -15,21 +15,38 @@
  */
 package com.meiste.tempalarm.backend;
 
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
-/**
- * Objectify service wrapper so we can statically register our persistence classes
- * More on Objectify here : https://code.google.com/p/objectify-appengine/
- */
-public class OfyService {
+@Entity
+public class SettingRecord {
 
-    static {
-        ObjectifyService.register(RegistrationRecord.class);
-        ObjectifyService.register(SettingRecord.class);
+    @Id
+    Long id;
+
+    @Index
+    private String name;
+
+    @Index
+    private String value;
+
+    public SettingRecord() {
     }
 
-    public static Objectify ofy() {
-        return ObjectifyService.ofy();
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(final String value) {
+        this.value = value;
     }
 }
