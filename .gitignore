@@ -1,0 +1,22 @@
+# Specific files to exclude
+crashlytics.properties
+crashlytics-build.properties
+com_crashlytics_export_strings.xml
+*.keystore
+
+# Gradle
+.gradle
+build
+
+# Local configuration files (sdk path, etc)
+local.properties
+gradle.properties
+
+# OS generated files
+.DS_Store
+
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea
