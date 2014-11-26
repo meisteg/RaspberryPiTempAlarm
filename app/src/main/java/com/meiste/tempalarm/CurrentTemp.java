@@ -24,6 +24,7 @@ import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.meiste.tempalarm.gcm.Gcm;
 
 public class CurrentTemp extends ActionBarActivity {
 
@@ -43,7 +44,7 @@ public class CurrentTemp extends ActionBarActivity {
         super.onResume();
 
         if (checkPlayServices()) {
-            // TODO: Add Google Play Services calls
+            Gcm.registerIfNeeded(getApplicationContext());
         }
     }
 
