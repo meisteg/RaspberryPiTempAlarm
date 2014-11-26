@@ -33,6 +33,7 @@ dependencies {
 
 appengine {
     downloadSdk = true
+    httpAddress = "0.0.0.0"
     appcfg {
         oauth2 = true
     }
