@@ -27,8 +27,7 @@ import android.text.format.DateUtils;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
-import com.google.api.client.googleapis.services.AbstractGoogleClientRequest;
-import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.tempalarm.BuildConfig;
 import com.meiste.tempalarm.Log;
 import com.meiste.tempalarm.backend.registration.Registration;
@@ -47,7 +46,7 @@ public final class Gcm {
 
     private static final String SENDER_ID = "233631917633";
 
-    private static final boolean USE_LOCAL_SERVER = true;
+    private static final boolean ALWAYS_FORCE_REGISTRATION = BuildConfig.DEBUG;
 
     private static final String GCM_PREFS = "com.google.android.gcm";
     private static final String PROPERTY_REG_ID = "regId";
@@ -69,7 +68,7 @@ public final class Gcm {
      * Checks whether the device was successfully registered in the server side.
      */
     public static boolean isRegisteredOnServer(final Context context) {
-        if (USE_LOCAL_SERVER) {
+        if (ALWAYS_FORCE_REGISTRATION) {
             return false;
         }
 
@@ -117,10 +116,11 @@ public final class Gcm {
     /**
      * Checks if the application needs to be registered, and registers if needed.
      */
-    public static void registerIfNeeded(final Context context) {
+    public static void registerIfNeeded(final Context context,
+                                        final GoogleAccountCredential credential) {
         if (!isRegistered(context) || !isRegisteredOnServer(context)) {
             Log.d(TAG, "Registering with GCM");
-            register(context);
+            register(context, credential);
         } else {
             Log.d(TAG, "Already registered with GCM: " + getRegistrationId(context));
         }
@@ -129,7 +129,7 @@ public final class Gcm {
     /**
      * Registers the device with GCM service.
      */
-    public static void register(final Context context) {
+    public static void register(final Context context, final GoogleAccountCredential credential) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -138,7 +138,7 @@ public final class Gcm {
                         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
                         final String regId = gcm.register(SENDER_ID);
                         storeRegistrationId(context, regId);
-                        sendRegistrationIdToBackend(context, regId);
+                        sendRegistrationIdToBackend(context, regId, credential);
                     } catch (final IOException e) {
                         Log.e(TAG, "GCM registration failed: " + e);
                     }
@@ -174,47 +174,28 @@ public final class Gcm {
      * Sets whether the device was successfully registered in the server side.
      */
     private static void setRegisteredOnServer(final Context context, final boolean flag) {
-        if (USE_LOCAL_SERVER) {
-            Log.d(TAG, "Not setting registeredOnServer status due to local server");
-        } else {
-            final SharedPreferences prefs = getGcmPrefs(context);
-            final Editor editor = prefs.edit();
-            editor.putBoolean(PROPERTY_ON_SERVER, flag);
-            // set the flag's expiration date
-            final long expirationTime = System.currentTimeMillis() + ON_SERVER_LIFESPAN_MS;
-            Log.d(TAG, "Setting registeredOnServer status as " + flag + " until " +
-                    new Timestamp(expirationTime));
-            editor.putLong(PROPERTY_ON_SERVER_EXPIRATION_TIME, expirationTime);
-            editor.apply();
-        }
+        final SharedPreferences prefs = getGcmPrefs(context);
+        final Editor editor = prefs.edit();
+        editor.putBoolean(PROPERTY_ON_SERVER, flag);
+        // set the flag's expiration date
+        final long expirationTime = System.currentTimeMillis() + ON_SERVER_LIFESPAN_MS;
+        Log.d(TAG, "Setting registeredOnServer status as " + flag + " until " +
+                new Timestamp(expirationTime));
+        editor.putLong(PROPERTY_ON_SERVER_EXPIRATION_TIME, expirationTime);
+        editor.apply();
     }
 
     /**
      * Sends the registration ID to app server.
      */
-    private static void sendRegistrationIdToBackend(final Context context, final String regId)
+    private static void sendRegistrationIdToBackend(final Context context, final String regId,
+                                                    final GoogleAccountCredential credential)
             throws IOException {
         Log.d(TAG, "Device registered with GCM: regId = " + regId);
 
         if (sRegService == null) {
-            final Registration.Builder builder =
-                    new Registration.Builder(AndroidHttp.newCompatibleTransport(),
-                            new AndroidJsonFactory(), null);
-            if (USE_LOCAL_SERVER) {
-                // Need setRootUrl and setGoogleClientRequestInitializer only for local testing,
-                // otherwise they can be skipped
-                builder.setRootUrl("http://10.0.0.13:8080/_ah/api/");
-                builder.setGoogleClientRequestInitializer(new GoogleClientRequestInitializer() {
-                    @Override
-                    public void initialize(AbstractGoogleClientRequest<?> abstractGoogleClientRequest)
-                            throws IOException {
-                        abstractGoogleClientRequest.setDisableGZipContent(true);
-                    }
-                });
-                // end of optional local run code
-            }
-
-            sRegService = builder.build();
+            sRegService = new Registration.Builder(AndroidHttp.newCompatibleTransport(),
+                    new AndroidJsonFactory(), credential).build();
         }
 
         sRegService.register(regId).execute();

@@ -15,8 +15,12 @@
  */
 package com.meiste.tempalarm;
 
+import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -24,12 +28,20 @@ import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.tempalarm.gcm.Gcm;
 
 public class CurrentTemp extends ActionBarActivity {
 
     private static final String TAG = CurrentTemp.class.getSimpleName();
+
     private static final int GPS_REQUEST = 1337;
+    private static final int ACCOUNT_PICKER_REQUEST = 1338;
+
+    private static final String PREF_ACCOUNT_NAME = "account_name";
+
+    private static final String CLIENT_AUDIENCE =
+            "server:client_id:233631917633-guka8vakql5qnni9j519jh7tl8brnqjt.apps.googleusercontent.com";
 
     private Dialog mDialog;
 
@@ -44,7 +56,17 @@ public class CurrentTemp extends ActionBarActivity {
         super.onResume();
 
         if (checkPlayServices()) {
-            Gcm.registerIfNeeded(getApplicationContext());
+            final SharedPreferences prefs =
+                    PreferenceManager.getDefaultSharedPreferences(this);
+            final GoogleAccountCredential credential =
+                    GoogleAccountCredential.usingAudience(getApplicationContext(), CLIENT_AUDIENCE);
+            credential.setSelectedAccountName(prefs.getString(PREF_ACCOUNT_NAME, null));
+
+            if (credential.getSelectedAccountName() != null) {
+                Gcm.registerIfNeeded(getApplicationContext(), credential);
+            } else {
+                startActivityForResult(credential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
+            }
         }
     }
 
@@ -77,6 +99,28 @@ public class CurrentTemp extends ActionBarActivity {
         }
 
         super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        switch (requestCode) {
+            case ACCOUNT_PICKER_REQUEST:
+                if ((data != null) && (data.getExtras() != null)) {
+                    final String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        Log.d(TAG, "User selected " + accountName);
+                        final SharedPreferences prefs =
+                                PreferenceManager.getDefaultSharedPreferences(this);
+                        final SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.apply();
+                    }
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
     }
 
     /**
