@@ -15,22 +15,36 @@
  */
 package com.meiste.tempalarm.backend;
 
-import com.googlecode.objectify.Objectify;
-import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
-/**
- * Objectify service wrapper so we can statically register our persistence classes
- * More on Objectify here : https://code.google.com/p/objectify-appengine/
- */
-public class OfyService {
+@Entity
+public class TemperatureRecord {
 
-    static {
-        ObjectifyService.register(RegistrationRecord.class);
-        ObjectifyService.register(SettingRecord.class);
-        ObjectifyService.register(TemperatureRecord.class);
+    @Id
+    Long id;
+
+    @Index
+    private long timestamp;
+
+    @Index
+    private float degF;
+
+    public TemperatureRecord() {
+        timestamp = System.currentTimeMillis();
     }
 
-    public static Objectify ofy() {
-        return ObjectifyService.ofy();
+    public float getDegF() {
+        return degF;
+    }
+
+    public void setDegF(final float degF) {
+        this.degF = degF;
+    }
+
+    public String getRelativeTimeSpanString() {
+        final long delta = System.currentTimeMillis() - timestamp;
+        return (delta / 60000) + " minute(s) ago";
     }
 }
