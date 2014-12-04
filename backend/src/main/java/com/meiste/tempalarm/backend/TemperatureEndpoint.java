@@ -30,28 +30,40 @@ import javax.inject.Named;
 
 import static com.meiste.tempalarm.backend.OfyService.ofy;
 
-/**
- * An endpoint to send messages to devices registered with the backend
- * <p/>
- * For more information, see
- * https://developers.google.com/appengine/docs/java/endpoints/
- * <p/>
- * NOTE: This endpoint does not use any form of authorization or
- * authentication! If this app is deployed, anyone can access this endpoint! If
- * you'd like to add authentication, take a look at the documentation.
- */
-@Api(name = "messaging", version = "v1", namespace = @ApiNamespace(ownerDomain = "backend.tempalarm.meiste.com", ownerName = "backend.tempalarm.meiste.com", packagePath = ""))
-public class MessagingEndpoint {
-    private static final Logger log = Logger.getLogger(MessagingEndpoint.class.getName());
+@Api(
+        name = "temperature",
+        version = "v1",
+        namespace = @ApiNamespace(
+                ownerDomain = "backend.tempalarm.meiste.com",
+                ownerName = "backend.tempalarm.meiste.com",
+                packagePath = ""
+        )
+)
+public class TemperatureEndpoint {
+    private static final Logger log = Logger.getLogger(TemperatureEndpoint.class.getName());
 
     private static final String SETTING_GCM_API_KEY = "gcm.api.key";
 
     /**
-     * Send to the first 10 devices (You can modify this to send to any number of devices or a specific device)
+     * Report the current temperature to the backend
      *
-     * @param message The message to send
+     * @param temperature The current temperature in degrees fahrenheit
      */
-    public void sendMessage(@Named("message") String message) throws IOException {
+    public void report(@Named("temperature") final float temperature) throws IOException {
+        final TemperatureRecord record = new TemperatureRecord();
+        record.setDegF(temperature);
+        ofy().save().entity(record).now();
+
+        // TODO: Only send GCM on first report below threshold
+        // TODO: Get threshold from settings datastore
+        // TODO: Send email
+        if (temperature < 45.0f) {
+            sendMessage("Temperature is " + record.getDegF() + " degrees");
+        }
+    }
+
+    // TODO: Add collapseKey, remove limit
+    private void sendMessage(String message) throws IOException {
         if (message == null || message.trim().length() == 0) {
             log.warning("Not sending message because it is empty");
             return;
