@@ -15,7 +15,6 @@
  */
 package com.meiste.tempalarm.backend;
 
-import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
@@ -42,7 +41,15 @@ import static com.meiste.tempalarm.backend.OfyService.ofy;
 public class TemperatureEndpoint {
     private static final Logger log = Logger.getLogger(TemperatureEndpoint.class.getName());
 
-    private static final String SETTING_GCM_API_KEY = "gcm.api.key";
+    /**
+     * Query the desired reporting rate
+     *
+     * @return The rate the temperature should be reported to the backend
+     */
+    public SettingRecord getReportRate() {
+        return SettingUtils.getSettingRecord(Constants.SETTING_REPORT_RATE,
+                Constants.DEFAULT_REPORT_RATE);
+    }
 
     /**
      * Report the current temperature to the backend
@@ -55,14 +62,21 @@ public class TemperatureEndpoint {
         ofy().save().entity(record).now();
 
         // TODO: Only send GCM on first report below threshold
-        // TODO: Get threshold from settings datastore
         // TODO: Send email
-        if (temperature < 45.0f) {
+        if (temperature < getLowTempThreshold()) {
             sendMessage("Temperature is " + record.getDegF() + " degrees");
         }
     }
 
-    // TODO: Add collapseKey, remove limit
+    /**
+     * Notifies the backend that temperature reporting has stopped.
+     */
+    public void stop() throws IOException {
+        // TODO: Implement actual logic
+        sendMessage("Temperature reporting has stopped");
+    }
+
+    // TODO: Add collapseKey
     private void sendMessage(String message) throws IOException {
         if (message == null || message.trim().length() == 0) {
             log.warning("Not sending message because it is empty");
@@ -74,7 +88,7 @@ public class TemperatureEndpoint {
         }
         Sender sender = new Sender(getApiKey());
         Message msg = new Message.Builder().addData("message", message).build();
-        List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).limit(10).list();
+        List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
         for (RegistrationRecord record : records) {
             Result result = sender.send(msg, record.getRegId(), 5);
             if (result.getMessageId() != null) {
@@ -88,7 +102,7 @@ public class TemperatureEndpoint {
                 }
             } else {
                 String error = result.getErrorCodeName();
-                if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
+                if (error.equals(com.google.android.gcm.server.Constants.ERROR_NOT_REGISTERED)) {
                     log.warning("Registration Id " + record.getRegId() + " no longer registered with GCM, removing from datastore");
                     // if the device is no longer registered with Gcm, remove it from the datastore
                     ofy().delete().entity(record).now();
@@ -99,18 +113,13 @@ public class TemperatureEndpoint {
         }
     }
 
-    private String getApiKey() {
-        SettingRecord setting = ofy().load().type(SettingRecord.class)
-                .filter("name", SETTING_GCM_API_KEY).first().now();
-        if (setting == null) {
-            setting = new SettingRecord();
-            setting.setName(SETTING_GCM_API_KEY);
-            setting.setValue("replace_this_text_with_the_real_API_Key");
-            ofy().save().entity(setting).now();
+    private static float getLowTempThreshold() {
+        return Float.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LOW,
+                Constants.DEFAULT_THRES_LOW));
+    }
 
-            log.severe("Created fake GCM API key! Please go to App Engine admin console, "
-                    + "change its value to your API Key, then restart the server!");
-        }
-        return setting.getValue();
+    private static String getApiKey() {
+        return SettingUtils.getSettingValue(Constants.SETTING_GCM_API_KEY,
+                Constants.DEFAULT_GCM_API_KEY);
     }
 }

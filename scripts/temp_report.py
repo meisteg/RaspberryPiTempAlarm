@@ -40,12 +40,19 @@ def main():
     service = build(SERVER_API, SERVER_API_VER, http=http,
                     discoveryServiceUrl=(SERVER_URL + "/_ah/api/discovery/v1/apis/" +
                                          SERVER_API + "/" + SERVER_API_VER + "/rest"))
+    endpoint = service.temperatureEndpoint()
   except Exception as e:
     print "error:", e.__doc__, "Stopping..."
     sys.exit(1)
 
-  print "Notify server that temperature monitoring has begun..."
-  service.temperatureEndpoint().report(temperature=31.1).execute()
+  print "Retrieve desired report rate from backend"
+  reportRate = endpoint.getReportRate().execute()["value"]
+  print "Backend requests report rate of", reportRate, "seconds"
+
+  endpoint.report(temperature=32.1).execute()
+
+  print "Stopping power alarm on server"
+  endpoint.stop().execute()
 
   print "DONE"
 
