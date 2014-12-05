@@ -45,6 +45,12 @@ public class TemperatureRecord {
 
     public String getRelativeTimeSpanString() {
         final long delta = System.currentTimeMillis() - timestamp;
-        return (delta / 60000) + " minute(s) ago";
+
+        if (delta < Constants.HOUR_IN_MILLIS) {
+            return (delta / Constants.MINUTE_IN_MILLIS) + " minute(s) ago";
+        } else if (delta < Constants.DAY_IN_MILLIS) {
+            return (delta / Constants.HOUR_IN_MILLIS) + " hour(s) ago";
+        }
+        return (delta / Constants.DAY_IN_MILLIS) + " day(s) ago";
     }
 }

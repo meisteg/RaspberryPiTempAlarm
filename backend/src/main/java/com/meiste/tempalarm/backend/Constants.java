@@ -22,4 +22,8 @@ public class Constants {
     public static final String ANDROID_AUDIENCE = WEB_CLIENT_ID;
 
     public static final String EMAIL_SCOPE = "https://www.googleapis.com/auth/userinfo.email";
+
+    public static final long MINUTE_IN_MILLIS = 60000;
+    public static final long HOUR_IN_MILLIS = 3600000;
+    public static final long DAY_IN_MILLIS = 86400000;
 }
