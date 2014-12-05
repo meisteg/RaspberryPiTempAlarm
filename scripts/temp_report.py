@@ -14,9 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+try:
+  from apiclient.discovery import build
+except ImportError:
+  print "error: apiclient is not installed. Please run the following command:"
+  print "       sudo pip install --upgrade google-api-python-client"
+  sys.exit(1)
+
 import httplib2
 import sys
-from apiclient.discovery import build
 
 SERVER_URL = "https://rasptempalarm.appspot.com"
 SERVER_API = "temperature"
