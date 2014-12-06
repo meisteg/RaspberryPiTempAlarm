@@ -21,8 +21,11 @@ except ImportError:
   print "       sudo pip install --upgrade google-api-python-client"
   sys.exit(1)
 
+import glob
 import httplib2
+import os
 import sys
+import time
 
 SERVER_URL = "https://rasptempalarm.appspot.com"
 SERVER_API = "temperature"
@@ -38,9 +41,53 @@ if (ver[0] == 3) or ((ver[0], ver[1]) < MIN_PYTHON_VERSION):
         % sys.version.split(' ')[0])
   sys.exit(1)
 
-def main():
-  print "Initializing server API..."
+sensor_file = ""
+endpoint = None
+report_rate = 60
 
+def read_temp_raw():
+  f = open(sensor_file, 'r')
+  lines = f.readlines()
+  f.close()
+  return lines
+
+def read_temp():
+  lines = read_temp_raw()
+  while lines[0].strip()[-3:] != 'YES':
+    time.sleep(0.2)
+    lines = read_temp_raw()
+  equals_pos = lines[1].find('t=')
+  if equals_pos != -1:
+    temp_string = lines[1][equals_pos+2:]
+    temp_c = float(temp_string) / 1000.0
+    temp_f = temp_c * 9.0 / 5.0 + 32.0
+    return temp_f
+
+def init():
+  global sensor_file
+  global endpoint
+  global report_rate
+
+  print "Loading kernel modules"
+  if os.system('modprobe w1-gpio'):
+    print "error: Failed to load w1-gpio"
+    sys.exit(1)
+  if os.system('modprobe w1-therm'):
+    print "error: Failed to load w1-therm"
+    sys.exit(1)
+
+  # Give modules time to initialize and find sensors on bus
+  time.sleep(1)
+
+  base_dir = '/sys/bus/w1/devices/'
+  sensors = glob.glob(base_dir + '28*')
+  if not sensors:
+    print "error: No sensors found!"
+    sys.exit(1)
+  sensor_file = sensors[0] + '/w1_slave'
+  print "Sensor found:", sensor_file
+
+  print "Initializing server API"
   http = httplib2.Http()
   try:
     service = build(SERVER_API, SERVER_API_VER, http=http,
@@ -52,10 +99,15 @@ def main():
     sys.exit(1)
 
   print "Retrieve desired report rate from backend"
-  reportRate = endpoint.getReportRate().execute()["value"]
-  print "Backend requests report rate of", reportRate, "seconds"
+  report_rate = endpoint.getReportRate().execute()["value"]
+  print "Backend requests report rate of", report_rate, "seconds"
 
-  endpoint.report(temperature=32.1).execute()
+def main():
+  init()
+
+  temp_f = read_temp()
+  print "Reporting", temp_f, "degrees to the backend"
+  endpoint.report(temperature=temp_f).execute()
 
   print "Stopping power alarm on server"
   endpoint.stop().execute()
