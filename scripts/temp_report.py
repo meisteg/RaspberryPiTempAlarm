@@ -26,12 +26,17 @@ import httplib2
 import os
 import sys
 import time
+import threading
+
+import RPi.GPIO as GPIO
 
 SERVER_URL = "https://rasptempalarm.appspot.com"
 SERVER_API = "temperature"
 SERVER_API_VER = "v1"
 
 MIN_PYTHON_VERSION = (2, 6)     # minimum supported python version
+
+GPIO_QUIT_BUTTON = 24
 
 # Python version check
 ver = sys.version_info
@@ -44,6 +49,17 @@ if (ver[0] == 3) or ((ver[0], ver[1]) < MIN_PYTHON_VERSION):
 sensor_file = ""
 endpoint = None
 report_rate = 60
+condition = threading.Condition()
+should_quit = False
+
+def quit_callback(channel):
+  global should_quit
+
+  condition.acquire()
+  print "Quit button pressed!"
+  should_quit = True
+  condition.notify()
+  condition.release()
 
 def read_temp_raw():
   f = open(sensor_file, 'r')
@@ -67,6 +83,12 @@ def init():
   global sensor_file
   global endpoint
   global report_rate
+
+  # Use the pin numbers from the ribbon cable board
+  GPIO.setmode(GPIO.BCM)
+
+  # Configure GPIOs
+  GPIO.setup(GPIO_QUIT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
   print "Loading kernel modules"
   if os.system('modprobe w1-gpio'):
@@ -102,16 +124,27 @@ def init():
   report_rate = endpoint.getReportRate().execute()["value"]
   print "Backend requests report rate of", report_rate, "seconds"
 
+  # Add interrupt
+  GPIO.add_event_detect(GPIO_QUIT_BUTTON, GPIO.FALLING,
+                        callback=quit_callback, bouncetime=300)
+
 def main():
   init()
 
-  temp_f = read_temp()
-  print "Reporting", temp_f, "degrees to the backend"
-  endpoint.report(temperature=temp_f).execute()
+  condition.acquire()
+  try:
+    while not should_quit:
+      temp_f = read_temp()
+      print "Reporting", temp_f, "degrees to the backend"
+      endpoint.report(temperature=temp_f).execute()
+      condition.wait(float(report_rate))
 
-  print "Stopping power alarm on server"
-  endpoint.stop().execute()
+    print "Stopping power alarm on server"
+    endpoint.stop().execute()
+  finally:
+    condition.release()
 
+  GPIO.cleanup()
   print "DONE"
 
 if __name__ == "__main__":
