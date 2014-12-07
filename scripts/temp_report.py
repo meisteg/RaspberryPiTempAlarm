@@ -21,6 +21,8 @@ except ImportError:
   print "       sudo pip install --upgrade google-api-python-client"
   sys.exit(1)
 
+from datetime import datetime
+
 import glob
 import httplib2
 import os
@@ -51,6 +53,21 @@ endpoint = None
 report_rate = 60
 condition = threading.Condition()
 should_quit = False
+
+# Setup print to add timestamp to each print
+old_f = sys.stdout
+class F:
+  nl = True
+  def write(self, x):
+    if x == '\n':
+      old_f.write(x)
+      self.nl = True
+    elif self.nl == True:
+      old_f.write("[%s] %s" % (str(datetime.now()), x))
+      self.nl = False
+    else:
+      old_f.write(x)
+sys.stdout = F()
 
 def quit_callback(channel):
   global should_quit
