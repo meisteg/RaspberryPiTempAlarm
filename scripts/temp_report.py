@@ -38,6 +38,8 @@ SERVER_API_VER = "v1"
 
 MIN_PYTHON_VERSION = (2, 6)     # minimum supported python version
 
+GPIO_RED_LED = 20
+GPIO_GREEN_LED = 21
 GPIO_QUIT_BUTTON = 24
 
 # Python version check
@@ -106,14 +108,20 @@ def init():
 
   # Configure GPIOs
   GPIO.setup(GPIO_QUIT_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+  GPIO.setup(GPIO_GREEN_LED, GPIO.OUT)
+  GPIO.setup(GPIO_RED_LED, GPIO.OUT)
+
+  # Set GPIOs to known states
+  GPIO.output(GPIO_RED_LED, False)
+  GPIO.output(GPIO_GREEN_LED, False)
 
   print "Loading kernel modules"
   if os.system('modprobe w1-gpio'):
     print "error: Failed to load w1-gpio"
-    sys.exit(1)
+    return -1
   if os.system('modprobe w1-therm'):
     print "error: Failed to load w1-therm"
-    sys.exit(1)
+    return -1
 
   # Give modules time to initialize and find sensors on bus
   time.sleep(1)
@@ -122,7 +130,7 @@ def init():
   sensors = glob.glob(base_dir + '28*')
   if not sensors:
     print "error: No sensors found!"
-    sys.exit(1)
+    return -1
   sensor_file = sensors[0] + '/w1_slave'
   print "Sensor found:", sensor_file
 
@@ -135,7 +143,7 @@ def init():
     endpoint = service.temperatureEndpoint()
   except Exception as e:
     print "error:", e.__doc__, "Stopping..."
-    sys.exit(1)
+    return -1
 
   print "Retrieve desired report rate from backend"
   report_rate = endpoint.getReportRate().execute()["value"]
@@ -145,8 +153,15 @@ def init():
   GPIO.add_event_detect(GPIO_QUIT_BUTTON, GPIO.FALLING,
                         callback=quit_callback, bouncetime=300)
 
+  # Init complete!
+  GPIO.output(GPIO_RED_LED, False)
+  GPIO.output(GPIO_GREEN_LED, True)
+  return 0
+
 def main():
-  init()
+  while init():
+    GPIO.output(GPIO_RED_LED, True)
+    time.sleep(5)
 
   condition.acquire()
   try:
