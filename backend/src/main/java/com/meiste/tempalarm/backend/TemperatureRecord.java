@@ -35,8 +35,8 @@ public class TemperatureRecord {
         timestamp = System.currentTimeMillis();
     }
 
-    public float getDegF() {
-        return degF;
+    public String getDegF() {
+        return String.format("%.1f", degF);
     }
 
     public void setDegF(final float degF) {
