@@ -20,6 +20,17 @@
                 if (temp != null) {
 %>
                 <h1><%= temp.getDegF() %> degrees</h1>
+<%
+                if (temp.areLightsOn()) {
+%>
+                <p>Lights are ON</p>
+<%
+                } else {
+%>
+                <p>Lights are OFF</p>
+<%
+                }
+%>
                 <p><%= temp.getRelativeTimeSpanString() %></p>
 <%
                 } else {

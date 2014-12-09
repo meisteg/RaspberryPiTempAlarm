@@ -55,10 +55,13 @@ public class TemperatureEndpoint {
      * Report the current temperature to the backend
      *
      * @param temperature The current temperature in degrees fahrenheit
+     * @param light       The current light level measured by RC circuit
      */
-    public void report(@Named("temperature") final float temperature) throws IOException {
+    public void report(@Named("temperature") final float temperature,
+                       @Named("light") final int light) throws IOException {
         final TemperatureRecord record = new TemperatureRecord();
         record.setDegF(temperature);
+        record.setLight(light);
         ofy().save().entity(record).now();
 
         // TODO: Only send GCM on first report below threshold

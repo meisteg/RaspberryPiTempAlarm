@@ -31,6 +31,9 @@ public class TemperatureRecord {
     @Index
     private float degF;
 
+    @Index
+    private int light;
+
     public TemperatureRecord() {
         timestamp = System.currentTimeMillis();
     }
@@ -41,6 +44,16 @@ public class TemperatureRecord {
 
     public void setDegF(final float degF) {
         this.degF = degF;
+    }
+
+    public boolean areLightsOn() {
+        final int thres = Integer.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LIGHT,
+                Constants.DEFAULT_THRES_LIGHT));
+        return light < thres;
+    }
+
+    public void setLight(final int light) {
+        this.light = light;
     }
 
     public String getRelativeTimeSpanString() {

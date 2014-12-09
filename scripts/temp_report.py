@@ -32,12 +32,15 @@ import threading
 
 import RPi.GPIO as GPIO
 
+DEBUG = False
+
 SERVER_URL = "https://rasptempalarm.appspot.com"
 SERVER_API = "temperature"
 SERVER_API_VER = "v1"
 
 MIN_PYTHON_VERSION = (2, 6)     # minimum supported python version
 
+GPIO_PHOTOCELL = 12
 GPIO_RED_LED = 20
 GPIO_GREEN_LED = 21
 GPIO_QUIT_BUTTON = 24
@@ -98,6 +101,18 @@ def read_temp():
     temp_f = temp_c * 9.0 / 5.0 + 32.0
     return temp_f
 
+def read_light():
+  reading = 0
+
+  GPIO.setup(GPIO_PHOTOCELL, GPIO.OUT)
+  GPIO.output(GPIO_PHOTOCELL, GPIO.LOW)
+  time.sleep(0.1)
+  
+  GPIO.setup(GPIO_PHOTOCELL, GPIO.IN)
+  while (GPIO.input(GPIO_PHOTOCELL) == GPIO.LOW):
+    reading += 1
+  return reading
+
 def init():
   global sensor_file
   global endpoint
@@ -112,8 +127,8 @@ def init():
   GPIO.setup(GPIO_RED_LED, GPIO.OUT)
 
   # Set GPIOs to known states
-  GPIO.output(GPIO_RED_LED, False)
-  GPIO.output(GPIO_GREEN_LED, False)
+  GPIO.output(GPIO_RED_LED, GPIO.LOW)
+  GPIO.output(GPIO_GREEN_LED, GPIO.LOW)
 
   print "Loading kernel modules"
   if os.system('modprobe w1-gpio'):
@@ -145,30 +160,35 @@ def init():
     print "error:", e.__doc__, "Stopping..."
     return -1
 
-  print "Retrieve desired report rate from backend"
-  report_rate = endpoint.getReportRate().execute()["value"]
-  print "Backend requests report rate of", report_rate, "seconds"
+  if DEBUG:
+    print "Using accelerated report rate for debugging"
+    report_rate = "5"
+  else:
+    print "Retrieve desired report rate from backend"
+    report_rate = endpoint.getReportRate().execute()["value"]
+    print "Backend requests report rate of", report_rate, "seconds"
 
   # Add interrupt
   GPIO.add_event_detect(GPIO_QUIT_BUTTON, GPIO.FALLING,
                         callback=quit_callback, bouncetime=300)
 
   # Init complete!
-  GPIO.output(GPIO_RED_LED, False)
-  GPIO.output(GPIO_GREEN_LED, True)
+  GPIO.output(GPIO_RED_LED, GPIO.LOW)
+  GPIO.output(GPIO_GREEN_LED, GPIO.HIGH)
   return 0
 
 def main():
   while init():
-    GPIO.output(GPIO_RED_LED, True)
+    GPIO.output(GPIO_RED_LED, GPIO.HIGH)
     time.sleep(5)
 
   condition.acquire()
   try:
     while not should_quit:
       temp_f = read_temp()
-      print "Reporting", temp_f, "degrees to the backend"
-      endpoint.report(temperature=temp_f).execute()
+      light = read_light()
+      print "Reporting", temp_f, "degrees and", light, "light to the backend"
+      endpoint.report(temperature=temp_f, light=light).execute()
       condition.wait(float(report_rate))
 
     print "Stopping power alarm on server"
