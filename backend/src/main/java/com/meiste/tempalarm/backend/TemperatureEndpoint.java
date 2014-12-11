@@ -15,14 +15,15 @@
  */
 package com.meiste.tempalarm.backend;
 
-import com.google.android.gcm.server.Message;
-import com.google.android.gcm.server.Result;
-import com.google.android.gcm.server.Sender;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiNamespace;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskHandle;
+import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -59,6 +60,8 @@ public class TemperatureEndpoint {
      */
     public void report(@Named("temperature") final float temperature,
                        @Named("light") final int light) throws IOException {
+        log.fine("temperature=" + temperature + ", light=" + light);
+
         final TemperatureRecord record = new TemperatureRecord();
         record.setDegF(temperature);
         record.setLight(light);
@@ -67,53 +70,26 @@ public class TemperatureEndpoint {
         // TODO: Only send GCM on first report below threshold
         // TODO: Send email
         if (temperature < getLowTempThreshold()) {
-            sendMessage("Temperature is " + record.getDegF() + " degrees");
+            Gcm.sendMessage("Temperature is " + record.getDegF() + " degrees");
         }
+
+        // Add the power outage monitor task to the default queue, removing previously
+        // scheduled task (if applicable).
+        deletePrevTask();
+        final TaskOptions taskOptions = TaskOptions.Builder
+                .withUrl("/tasks/pwr_out")
+                .countdownMillis(getCountdownMillis())
+                .method(Method.POST);
+        final TaskHandle taskHandle = QueueFactory.getDefaultQueue().add(taskOptions);
+        SettingUtils.setValue(Constants.SETTING_TASK_NAME, taskHandle.getName());
     }
 
     /**
      * Notifies the backend that temperature reporting has stopped.
      */
     public void stop() throws IOException {
-        // TODO: Implement actual logic
-        sendMessage("Temperature reporting has stopped");
-    }
-
-    // TODO: Add collapseKey
-    private void sendMessage(String message) throws IOException {
-        if (message == null || message.trim().length() == 0) {
-            log.warning("Not sending message because it is empty");
-            return;
-        }
-        // crop longer messages
-        if (message.length() > 1000) {
-            message = message.substring(0, 1000) + "[...]";
-        }
-        Sender sender = new Sender(getApiKey());
-        Message msg = new Message.Builder().addData("message", message).build();
-        List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
-        for (RegistrationRecord record : records) {
-            Result result = sender.send(msg, record.getRegId(), 5);
-            if (result.getMessageId() != null) {
-                log.info("Message sent to " + record.getRegId());
-                String canonicalRegId = result.getCanonicalRegistrationId();
-                if (canonicalRegId != null) {
-                    // if the regId changed, we have to update the datastore
-                    log.info("Registration Id changed for " + record.getRegId() + " updating to " + canonicalRegId);
-                    record.setRegId(canonicalRegId);
-                    ofy().save().entity(record).now();
-                }
-            } else {
-                String error = result.getErrorCodeName();
-                if (error.equals(com.google.android.gcm.server.Constants.ERROR_NOT_REGISTERED)) {
-                    log.warning("Registration Id " + record.getRegId() + " no longer registered with GCM, removing from datastore");
-                    // if the device is no longer registered with Gcm, remove it from the datastore
-                    ofy().delete().entity(record).now();
-                } else {
-                    log.warning("Error when sending message : " + error);
-                }
-            }
-        }
+        deletePrevTask();
+        Gcm.sendMessage("Temperature reporting has stopped");
     }
 
     private static float getLowTempThreshold() {
@@ -121,8 +97,19 @@ public class TemperatureEndpoint {
                 Constants.DEFAULT_THRES_LOW));
     }
 
-    private static String getApiKey() {
-        return SettingUtils.getSettingValue(Constants.SETTING_GCM_API_KEY,
-                Constants.DEFAULT_GCM_API_KEY);
+    private static long getCountdownMillis() {
+        final int rate = Integer.valueOf(SettingUtils.getSettingValue(
+                Constants.SETTING_REPORT_RATE, Constants.DEFAULT_REPORT_RATE));
+        return (rate * Constants.REPORTS_MISSED_BEFORE_ALARM * Constants.SECOND_IN_MILLIS) +
+                Constants.MINUTE_IN_MILLIS;
+    }
+
+    private static void deletePrevTask() {
+        final String prevTask = SettingUtils.getSettingValue(Constants.SETTING_TASK_NAME,
+                Constants.DEFAULT_TASK_NAME);
+        if (!prevTask.equals(Constants.DEFAULT_TASK_NAME)) {
+            QueueFactory.getDefaultQueue().deleteTask(prevTask);
+            SettingUtils.setValue(Constants.SETTING_TASK_NAME, Constants.DEFAULT_TASK_NAME);
+        }
     }
 }

@@ -41,4 +41,15 @@ public class SettingUtils {
     public static String getSettingValue(final String name, final String defValue) {
         return getSettingRecord(name, defValue).getValue();
     }
+
+    public static void setValue(final String name, final String newValue) {
+        SettingRecord setting = ofy().load().type(SettingRecord.class)
+                .filter("name", name).first().now();
+        if (setting == null) {
+            setting = new SettingRecord();
+            setting.setName(name);
+        }
+        setting.setValue(newValue);
+        ofy().save().entity(setting).now();
+    }
 }

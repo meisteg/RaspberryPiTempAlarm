@@ -26,12 +26,17 @@ public class Constants {
     public static final String SETTING_THRES_LIGHT = "thres.light";
     public static final String SETTING_THRES_LOW = "thres.low";
     public static final String SETTING_REPORT_RATE = "report.rate";
+    public static final String SETTING_TASK_NAME = "task.pwr_out";
 
     public static final String DEFAULT_GCM_API_KEY = "replace_this_text_with_the_real_API_Key";
     public static final String DEFAULT_THRES_LIGHT = Integer.toString(500);
     public static final String DEFAULT_THRES_LOW = Float.toString(45.0f);
     public static final String DEFAULT_REPORT_RATE = Integer.toString(300);
+    public static final String DEFAULT_TASK_NAME = "none";
 
+    public static final int REPORTS_MISSED_BEFORE_ALARM = 2;
+
+    public static final long SECOND_IN_MILLIS = 1000;
     public static final long MINUTE_IN_MILLIS = 60000;
     public static final long HOUR_IN_MILLIS = 3600000;
     public static final long DAY_IN_MILLIS = 86400000;
