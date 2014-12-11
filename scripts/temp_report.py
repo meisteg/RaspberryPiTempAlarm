@@ -113,6 +113,10 @@ def read_light():
     reading += 1
   return reading
 
+def setLedSuccess(success):
+  GPIO.output(GPIO_RED_LED, not success)
+  GPIO.output(GPIO_GREEN_LED, success)
+
 def init():
   global sensor_file
   global endpoint
@@ -156,30 +160,29 @@ def init():
                     discoveryServiceUrl=(SERVER_URL + "/_ah/api/discovery/v1/apis/" +
                                          SERVER_API + "/" + SERVER_API_VER + "/rest"))
     endpoint = service.temperatureEndpoint()
-  except Exception as e:
-    print "error:", e.__doc__, "Stopping..."
-    return -1
 
-  if DEBUG:
-    print "Using accelerated report rate for debugging"
-    report_rate = "5"
-  else:
-    print "Retrieve desired report rate from backend"
-    report_rate = endpoint.getReportRate().execute()["value"]
-    print "Backend requests report rate of", report_rate, "seconds"
+    if DEBUG:
+      print "Using accelerated report rate for debugging"
+      report_rate = "5"
+    else:
+      print "Retrieve desired report rate from backend"
+      report_rate = endpoint.getReportRate().execute()["value"]
+      print "Backend requests report rate of", report_rate, "seconds"
+  except Exception as e:
+    print "error:", e.__doc__
+    return -1
 
   # Add interrupt
   GPIO.add_event_detect(GPIO_QUIT_BUTTON, GPIO.FALLING,
                         callback=quit_callback, bouncetime=300)
 
   # Init complete!
-  GPIO.output(GPIO_RED_LED, GPIO.LOW)
-  GPIO.output(GPIO_GREEN_LED, GPIO.HIGH)
+  setLedSuccess(True)
   return 0
 
 def main():
   while init():
-    GPIO.output(GPIO_RED_LED, GPIO.HIGH)
+    setLedSuccess(False)
     time.sleep(5)
 
   condition.acquire()
@@ -188,11 +191,20 @@ def main():
       temp_f = read_temp()
       light = read_light()
       print "Reporting", temp_f, "degrees and", light, "light to the backend"
-      endpoint.report(temperature=temp_f, light=light).execute()
-      condition.wait(float(report_rate))
+      try:
+        endpoint.report(temperature=temp_f, light=light).execute()
+        setLedSuccess(True)
+        condition.wait(float(report_rate))
+      except Exception as e:
+        print "error:", e.__doc__
+        setLedSuccess(False)
+        condition.wait(30)
 
     print "Stopping power alarm on server"
-    endpoint.stop().execute()
+    try:
+      endpoint.stop().execute()
+    except Exception as e:
+      print "error:", e.__doc__
   finally:
     condition.release()
 
