@@ -39,31 +39,42 @@ public class Gcm {
         if (message.length() > 1000) {
             message = message.substring(0, 1000) + "[...]";
         }
-        Sender sender = new Sender(getApiKey());
-        Message msg = new Message.Builder().addData("message", message).build();
-        List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
-        for (RegistrationRecord record : records) {
-            Result result = sender.send(msg, record.getRegId(), 5);
+        final Sender sender = new Sender(getApiKey());
+        final Message msg = new Message.Builder().addData("message", message).build();
+        final List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
+        for (final RegistrationRecord record : records) {
+            final Result result = sender.send(msg, record.getRegId(), 5);
             if (result.getMessageId() != null) {
-                log.info("Message sent to " + record.getRegId());
-                String canonicalRegId = result.getCanonicalRegistrationId();
+                log.fine("Message sent to " + record.getRegId());
+                final String canonicalRegId = result.getCanonicalRegistrationId();
                 if (canonicalRegId != null) {
                     // if the regId changed, we have to update the datastore
-                    log.info("Registration Id changed for " + record.getRegId() + " updating to " + canonicalRegId);
-                    record.setRegId(canonicalRegId);
-                    ofy().save().entity(record).now();
+                    log.info("Registration Id changed for " + record.getRegId() +
+                            " updating to " + canonicalRegId);
+                    if (findRecord(canonicalRegId) == null) {
+                        record.setRegId(canonicalRegId);
+                        ofy().save().entity(record).now();
+                    } else {
+                        // Device already told us new regId, so simply delete the old one
+                        ofy().delete().entity(record).now();
+                    }
                 }
             } else {
-                String error = result.getErrorCodeName();
+                final String error = result.getErrorCodeName();
                 if (error.equals(com.google.android.gcm.server.Constants.ERROR_NOT_REGISTERED)) {
-                    log.warning("Registration Id " + record.getRegId() + " no longer registered with GCM, removing from datastore");
-                    // if the device is no longer registered with Gcm, remove it from the datastore
+                    log.warning("Registration Id " + record.getRegId() +
+                            " no longer registered with GCM, removing from datastore");
+                    // if the device is no longer registered with GCM, remove it from the datastore
                     ofy().delete().entity(record).now();
                 } else {
                     log.warning("Error when sending message : " + error);
                 }
             }
         }
+    }
+
+    public static RegistrationRecord findRecord(final String regId) {
+        return ofy().load().type(RegistrationRecord.class).filter("regId", regId).first().now();
     }
 
     private static String getApiKey() {
