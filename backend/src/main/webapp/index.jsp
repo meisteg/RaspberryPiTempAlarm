@@ -7,6 +7,7 @@
 <head>
     <title>Raspberry Pi Temperature Alarm</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <meta http-equiv="refresh" content="60">
 </head>
 <body role="document" style="padding-top: 70px;">
 
