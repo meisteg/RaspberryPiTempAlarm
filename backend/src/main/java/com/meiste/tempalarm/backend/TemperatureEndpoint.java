@@ -17,7 +17,6 @@ package com.meiste.tempalarm.backend;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiNamespace;
-import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
