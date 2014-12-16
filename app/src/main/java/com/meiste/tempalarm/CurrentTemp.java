@@ -64,8 +64,6 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
 
         if (checkPlayServices()) {
             if (mCredential.getSelectedAccountName() != null) {
-                GCMHelper.setRegisterOnServerLifespan(getApplicationContext(),
-                        BuildConfig.DEBUG ? 0 : GCMHelper.DEFAULT_ON_SERVER_LIFESPAN_MS);
                 GCMHelper.registerIfNeeded(getApplicationContext(), AppContants.GCM_SENDER_ID, this);
             } else {
                 startActivityForResult(mCredential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
