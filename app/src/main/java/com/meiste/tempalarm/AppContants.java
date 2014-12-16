@@ -21,4 +21,6 @@ public class AppContants {
             "server:client_id:233631917633-guka8vakql5qnni9j519jh7tl8brnqjt.apps.googleusercontent.com";
 
     public static final String PREF_ACCOUNT_NAME = "account_name";
+
+    public static final int AUTO_SYNC_FREQUENCY = 3600; // 1 hour (in seconds)
 }

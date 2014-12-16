@@ -20,8 +20,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -35,6 +33,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.backend.registration.Registration;
+import com.meiste.tempalarm.sync.AccountUtils;
 
 import java.io.IOException;
 
@@ -54,11 +53,9 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
         super.onCreate(savedInstanceState);
         setContentView(R.layout.current_temp);
 
-        final SharedPreferences prefs =
-                PreferenceManager.getDefaultSharedPreferences(this);
         mCredential = GoogleAccountCredential.usingAudience(getApplicationContext(),
                 AppContants.CLIENT_AUDIENCE);
-        mCredential.setSelectedAccountName(prefs.getString(AppContants.PREF_ACCOUNT_NAME, null));
+        mCredential.setSelectedAccountName(AccountUtils.getAccountName(this));
     }
 
     @Override
@@ -115,11 +112,7 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
                     final String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (!TextUtils.isEmpty(accountName)) {
                         Log.d(TAG, "User selected " + accountName);
-                        final SharedPreferences prefs =
-                                PreferenceManager.getDefaultSharedPreferences(this);
-                        final SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString(AppContants.PREF_ACCOUNT_NAME, accountName);
-                        editor.apply();
+                        AccountUtils.setAccount(this, accountName);
                         mCredential.setSelectedAccountName(accountName);
                     }
                 }
