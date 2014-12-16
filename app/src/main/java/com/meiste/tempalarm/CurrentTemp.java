@@ -33,7 +33,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.meiste.gcm.GCMHelper;
+import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.backend.registration.Registration;
 
 import java.io.IOException;
