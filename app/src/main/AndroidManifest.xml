@@ -17,6 +17,7 @@
     <uses-permission android:name="com.meiste.tempalarm.permission.C2D_MESSAGE" />
 
     <application
+        android:name=".RasPiApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"

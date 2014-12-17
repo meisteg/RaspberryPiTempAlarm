@@ -27,6 +27,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 
 /**
@@ -223,7 +224,7 @@ public final class GCMHelper {
     /**
      * Gets the application version.
      */
-    private static int getAppVersion(Context context) {
+    private static int getAppVersion(final Context context) {
         try {
             final PackageInfo packageInfo = context.getPackageManager()
                     .getPackageInfo(context.getPackageName(), 0);
@@ -242,12 +243,21 @@ public final class GCMHelper {
      * @param template message's template
      * @param args list of arguments
      */
-    private static void log(Context context, int priority, String template,
-                            Object... args) {
-        if (Log.isLoggable(TAG, priority)) {
-            String message = String.format(template, args);
-            Log.println(priority, TAG, "[" + context.getPackageName() + "]: "
-                    + message);
+    private static void log(final Context context, final int priority, final String template,
+                            final Object... args) {
+        try {
+            final Class<?> clazz = Class.forName("timber.log.Timber");
+            final Method tag = clazz.getMethod("tag", String.class);
+            final Method log = clazz.getMethod(priority == Log.ERROR ? "e" : "v",
+                    String.class, Object[].class);
+            tag.invoke(null, TAG);
+            log.invoke(null, template, args);
+        } catch (final Exception e) {
+            if (Log.isLoggable(TAG, priority)) {
+                final String message = String.format(template, args);
+                Log.println(priority, TAG, "[" + context.getPackageName() + "]: "
+                        + message);
+            }
         }
     }
 

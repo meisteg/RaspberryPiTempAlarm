@@ -33,16 +33,15 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.AppContants;
-import com.meiste.tempalarm.Log;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.registration.Registration;
 import com.meiste.tempalarm.sync.AccountUtils;
 
 import java.io.IOException;
 
-public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmRegistrationListener {
+import timber.log.Timber;
 
-    private static final String TAG = CurrentTemp.class.getSimpleName();
+public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmRegistrationListener {
 
     private static final int GPS_REQUEST = 1337;
     private static final int ACCOUNT_PICKER_REQUEST = 1338;
@@ -112,7 +111,7 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
                 if ((data != null) && (data.getExtras() != null)) {
                     final String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (!TextUtils.isEmpty(accountName)) {
-                        Log.d(TAG, "User selected " + accountName);
+                        Timber.d("User selected " + accountName);
                         AccountUtils.setAccount(this, accountName);
                         mCredential.setSelectedAccountName(accountName);
                     }
@@ -146,7 +145,7 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
                         });
                 mDialog.show();
             } else {
-                Log.e(TAG, "This device is not supported.");
+                Timber.e("This device is not supported.");
                 finish();
             }
             return false;
@@ -156,7 +155,7 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
 
     @Override
     public boolean onSendRegistrationIdToBackend(Context context, String regId) throws IOException {
-        Log.d(TAG, "Device registered with GCM: regId = " + regId);
+        Timber.d("Device registered with GCM: regId = " + regId);
 
         if (mRegService == null) {
             mRegService = new Registration.Builder(AndroidHttp.newCompatibleTransport(),

@@ -20,11 +20,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.meiste.tempalarm.Log;
+
+import timber.log.Timber;
 
 public class GcmIntentService extends IntentService {
-
-    private static final String TAG = GcmIntentService.class.getSimpleName();
 
     public GcmIntentService() {
         super(GcmIntentService.class.getSimpleName());
@@ -38,7 +37,7 @@ public class GcmIntentService extends IntentService {
 
         if (extras != null && !extras.isEmpty()) {
             if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                Log.d(TAG, "GCM RECEIVED: " + extras.getString("message"));
+                Timber.d("GCM RECEIVED: " + extras.getString("message"));
             }
         }
 

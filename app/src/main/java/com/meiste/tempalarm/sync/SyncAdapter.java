@@ -26,12 +26,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import com.meiste.tempalarm.Log;
 import com.meiste.tempalarm.provider.RasPiContract;
 
-public class SyncAdapter extends AbstractThreadedSyncAdapter {
+import timber.log.Timber;
 
-    private static final String TAG = SyncAdapter.class.getSimpleName();
+public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     /**
      * Whether there is any network connected.
@@ -56,7 +55,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return false;
         }
 
-        Log.d(TAG, "Requesting network synchronization");
+        Timber.d("Requesting network synchronization");
 
         final Bundle b = new Bundle();
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, isUserRequested);
@@ -73,10 +72,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(final Account account, final Bundle extras, final String authority,
                               final ContentProviderClient provider, final SyncResult syncResult) {
-        Log.d(TAG, "Beginning network sync for " + account.name);
+        Timber.d("Beginning network sync for " + account.name);
 
         // TODO
 
-        Log.d(TAG, "Network synchronization complete");
+        Timber.d("Network synchronization complete");
     }
 }
