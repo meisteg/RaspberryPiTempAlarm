@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.meiste.tempalarm;
+package com.meiste.tempalarm.ui;
 
 import android.accounts.AccountManager;
 import android.app.Dialog;
@@ -32,6 +32,9 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.greg.gcm.GCMHelper;
+import com.meiste.tempalarm.AppContants;
+import com.meiste.tempalarm.Log;
+import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.registration.Registration;
 import com.meiste.tempalarm.sync.AccountUtils;
 
