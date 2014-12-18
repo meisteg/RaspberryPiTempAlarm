@@ -15,11 +15,14 @@
  */
 package com.meiste.tempalarm.ui;
 
+import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SyncStatusObserver;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -35,7 +38,9 @@ import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.AppContants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.registration.Registration;
+import com.meiste.tempalarm.provider.RasPiContract;
 import com.meiste.tempalarm.sync.AccountUtils;
+import com.meiste.tempalarm.sync.SyncAdapter;
 
 import java.io.IOException;
 
@@ -49,6 +54,8 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
     private Dialog mDialog;
     private GoogleAccountCredential mCredential;
     private Registration mRegService;
+    private Object mSyncObserverHandle;
+    private Menu mOptionsMenu;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -63,6 +70,7 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
     @Override
     protected void onResume() {
         super.onResume();
+        mSyncStatusObserver.onStatusChanged(0);
 
         if (checkPlayServices()) {
             if (mCredential.getSelectedAccountName() != null) {
@@ -70,28 +78,42 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
             } else {
                 startActivityForResult(mCredential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
             }
+
+            // Watch for sync state changes
+            final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
+                    ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
+            mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_current_temp, menu);
+        mOptionsMenu = menu;
+        getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        final int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                // TODO: Launch settings activity
+                return true;
+            case R.id.action_refresh:
+                SyncAdapter.requestSync(this, true);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mSyncObserverHandle != null) {
+            ContentResolver.removeStatusChangeListener(mSyncObserverHandle);
+            mSyncObserverHandle = null;
+        }
     }
 
     @Override
@@ -165,4 +187,61 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
         mRegService.register(regId).execute();
         return true;
     }
+
+    /**
+     * Set the state of the Refresh button. If a sync is active, turn on the ProgressBar widget.
+     * Otherwise, turn it off.
+     *
+     * @param refreshing True if an active sync is occurring, false otherwise
+     */
+    public void setRefreshActionButtonState(final boolean refreshing) {
+        if (mOptionsMenu == null) {
+            return;
+        }
+
+        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.action_refresh);
+        if (refreshItem != null) {
+            if (refreshing) {
+                refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
+            } else {
+                refreshItem.setActionView(null);
+            }
+        }
+    }
+
+    /**
+     * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
+     * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
+     * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
+     * ProgressBar; otherwise, the button itself is displayed.
+     */
+    private final SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver() {
+        /** Callback invoked when the sync adapter status changes. */
+        @Override
+        public void onStatusChanged(final int which) {
+            runOnUiThread(new Runnable() {
+                /**
+                 * The SyncAdapter runs on a background thread. To update the UI, onStatusChanged()
+                 * runs on the UI thread.
+                 */
+                @Override
+                public void run() {
+                    final Account account = AccountUtils.getAccount(getApplicationContext());
+                    if (account == null) {
+                        // This shouldn't happen, but set the status to "not refreshing".
+                        setRefreshActionButtonState(false);
+                        return;
+                    }
+
+                    // Test the ContentResolver to see if the sync adapter is active or pending.
+                    // Set the state of the refresh button accordingly.
+                    final boolean syncActive = ContentResolver.isSyncActive(
+                            account, RasPiContract.CONTENT_AUTHORITY);
+                    final boolean syncPending = ContentResolver.isSyncPending(
+                            account, RasPiContract.CONTENT_AUTHORITY);
+                    setRefreshActionButtonState(syncActive || syncPending);
+                }
+            });
+        }
+    };
 }
