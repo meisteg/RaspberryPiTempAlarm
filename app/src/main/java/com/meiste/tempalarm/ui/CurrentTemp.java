@@ -52,7 +52,6 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
     private static final int ACCOUNT_PICKER_REQUEST = 1338;
 
     private Dialog mDialog;
-    private GoogleAccountCredential mCredential;
     private Registration mRegService;
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
@@ -61,10 +60,6 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.current_temp);
-
-        mCredential = GoogleAccountCredential.usingAudience(getApplicationContext(),
-                AppContants.CLIENT_AUDIENCE);
-        mCredential.setSelectedAccountName(AccountUtils.getAccountName(this));
     }
 
     @Override
@@ -73,10 +68,11 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
         mSyncStatusObserver.onStatusChanged(0);
 
         if (checkPlayServices()) {
-            if (mCredential.getSelectedAccountName() != null) {
+            final GoogleAccountCredential credential = AccountUtils.getCredential(this);
+            if (credential.getSelectedAccountName() != null) {
                 GCMHelper.registerIfNeeded(getApplicationContext(), AppContants.GCM_SENDER_ID, this);
             } else {
-                startActivityForResult(mCredential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
+                startActivityForResult(credential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
             }
 
             // Watch for sync state changes
@@ -135,7 +131,6 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
                     if (!TextUtils.isEmpty(accountName)) {
                         Timber.d("User selected " + accountName);
                         AccountUtils.setAccount(this, accountName);
-                        mCredential.setSelectedAccountName(accountName);
                     }
                 }
                 break;
@@ -176,12 +171,15 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
     }
 
     @Override
-    public boolean onSendRegistrationIdToBackend(Context context, String regId) throws IOException {
+    public boolean onSendRegistrationIdToBackend(final Context context, final String regId)
+            throws IOException {
         Timber.d("Device registered with GCM: regId = " + regId);
 
         if (mRegService == null) {
             mRegService = new Registration.Builder(AndroidHttp.newCompatibleTransport(),
-                    new AndroidJsonFactory(), mCredential).build();
+                    new AndroidJsonFactory(), AccountUtils.getCredential(this))
+                    .setApplicationName(context.getString(R.string.app_name))
+                    .build();
         }
 
         mRegService.register(regId).execute();

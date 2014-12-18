@@ -26,11 +26,24 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.tempalarm.AppContants;
 import com.meiste.tempalarm.provider.RasPiContract;
 
 public class AccountUtils {
-    public static String getAccountName(final Context context) {
+
+    private static GoogleAccountCredential sCredential;
+
+    public static synchronized GoogleAccountCredential getCredential(final Context context) {
+        if (sCredential == null) {
+            sCredential = GoogleAccountCredential.usingAudience(context.getApplicationContext(),
+                    AppContants.CLIENT_AUDIENCE);
+            sCredential.setSelectedAccountName(AccountUtils.getAccountName(context));
+        }
+        return sCredential;
+    }
+
+    public static synchronized String getAccountName(final Context context) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         final String account = prefs.getString(AppContants.PREF_ACCOUNT_NAME, null);
 
@@ -56,7 +69,7 @@ public class AccountUtils {
         return null;
     }
 
-    public static Account getAccount(final Context context) {
+    public static synchronized Account getAccount(final Context context) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         final String account = prefs.getString(AppContants.PREF_ACCOUNT_NAME, null);
         final AccountManager mgr = AccountManager.get(context);
@@ -71,7 +84,7 @@ public class AccountUtils {
         return null;
     }
 
-    public static void setAccount(final Context context, final String accountName) {
+    public static synchronized void setAccount(final Context context, final String accountName) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         final String oldAccountName = prefs.getString(AppContants.PREF_ACCOUNT_NAME, null);
 
@@ -95,5 +108,9 @@ public class AccountUtils {
         // on other scheduled syncs and network utilization.
         ContentResolver.addPeriodicSync(account, RasPiContract.CONTENT_AUTHORITY,
                 new Bundle(), AppContants.AUTO_SYNC_FREQUENCY);
+
+        if (sCredential != null) {
+            sCredential.setSelectedAccountName(accountName);
+        }
     }
 }
