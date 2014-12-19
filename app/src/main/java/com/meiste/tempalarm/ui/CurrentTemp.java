@@ -31,8 +31,6 @@ import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.AppContants;
@@ -176,8 +174,8 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
         Timber.d("Device registered with GCM: regId = " + regId);
 
         if (mRegService == null) {
-            mRegService = new Registration.Builder(AndroidHttp.newCompatibleTransport(),
-                    new AndroidJsonFactory(), AccountUtils.getCredential(this))
+            mRegService = new Registration.Builder(AppContants.HTTP_TRANSPORT,
+                    AppContants.JSON_FACTORY, AccountUtils.getCredential(this))
                     .setApplicationName(context.getString(R.string.app_name))
                     .build();
         }

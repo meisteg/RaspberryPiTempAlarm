@@ -16,13 +16,16 @@
 package com.meiste.tempalarm.backend;
 
 import com.google.api.server.spi.config.Api;
+import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
+import com.google.api.server.spi.response.CollectionResponse;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskHandle;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.inject.Named;
@@ -91,9 +94,31 @@ public class TemperatureEndpoint {
         Gcm.sendMessage("Temperature reporting has stopped");
     }
 
+    /**
+     * Return a collection of temperature data
+     *
+     * @param count The number of temperature records to return (or 0 for max)
+     * @return a list of temperature records
+     */
+    @ApiMethod(name = "get")
+    public CollectionResponse<TemperatureRecord> listRecords(@Named("count") final int count) {
+        int limit = getRecordLimit();
+        if ((count > 0) && (count < limit)) {
+            limit = count;
+        }
+        final List<TemperatureRecord> records = ofy().load().type(TemperatureRecord.class)
+                .order("-timestamp").limit(limit).list();
+        return CollectionResponse.<TemperatureRecord>builder().setItems(records).build();
+    }
+
     private static float getLowTempThreshold() {
         return Float.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LOW,
                 Constants.DEFAULT_THRES_LOW));
+    }
+
+    private static int getRecordLimit() {
+        return Integer.valueOf(SettingUtils.getSettingValue(Constants.SETTING_RECORD_LIMIT,
+                Constants.DEFAULT_RECORD_LIMIT));
     }
 
     private static long getCountdownMillis() {

@@ -15,6 +15,10 @@
  */
 package com.meiste.tempalarm;
 
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.google.api.client.http.HttpTransport;
+
 public class AppContants {
     public static final String GCM_SENDER_ID = "233631917633";
     public static final String CLIENT_AUDIENCE =
@@ -23,4 +27,7 @@ public class AppContants {
     public static final String PREF_ACCOUNT_NAME = "account_name";
 
     public static final int AUTO_SYNC_FREQUENCY = 3600; // 1 hour (in seconds)
+
+    public static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
+    public static final AndroidJsonFactory JSON_FACTORY = new AndroidJsonFactory();
 }

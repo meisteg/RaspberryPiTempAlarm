@@ -52,6 +52,10 @@ public class TemperatureRecord {
         return light < thres;
     }
 
+    public int getLight() {
+        return light;
+    }
+
     public void setLight(final int light) {
         this.light = light;
     }
@@ -65,5 +69,9 @@ public class TemperatureRecord {
             return (delta / Constants.HOUR_IN_MILLIS) + " hour(s) ago";
         }
         return (delta / Constants.DAY_IN_MILLIS) + " day(s) ago";
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 }

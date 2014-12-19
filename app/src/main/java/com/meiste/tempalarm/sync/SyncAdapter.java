@@ -26,14 +26,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+import com.meiste.tempalarm.AppContants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.temperature.Temperature;
+import com.meiste.tempalarm.backend.temperature.model.CollectionResponseTemperatureRecord;
 import com.meiste.tempalarm.backend.temperature.model.SettingRecord;
+import com.meiste.tempalarm.backend.temperature.model.TemperatureRecord;
 import com.meiste.tempalarm.provider.RasPiContract;
 
 import java.io.IOException;
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -78,8 +80,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         super(context, autoInitialize);
         Timber.d("Creating sync adapter");
 
-        mTempService = new Temperature.Builder(AndroidHttp.newCompatibleTransport(),
-                new AndroidJsonFactory(), AccountUtils.getCredential(context))
+        mTempService = new Temperature.Builder(AppContants.HTTP_TRANSPORT,
+                AppContants.JSON_FACTORY, AccountUtils.getCredential(context))
                 .setApplicationName(context.getString(R.string.app_name))
                 .build();
     }
@@ -90,11 +92,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         Timber.d("Beginning network sync for " + account.name);
 
         try {
-            // TODO: Download temp records. Downloading report rate for now to prove setup.
-            final SettingRecord record = mTempService.temperatureEndpoint().getReportRate().execute();
-            Timber.i("Report rate is %s seconds", record.getValue());
+            // TODO: Store temperature records
+            final CollectionResponseTemperatureRecord tempCollection = mTempService.get(10).execute();
+            final List<TemperatureRecord> records = tempCollection.getItems();
+            for (final TemperatureRecord record : records) {
+                Timber.i("%s: temp=%s, light=%s", record.getTimestamp(), record.getDegF(), record.getLight());
+            }
         } catch (final IOException e) {
-            Timber.e("Failed to download report rate");
+            Timber.e("Failed to download temperature records");
         }
 
         Timber.d("Network synchronization complete");
