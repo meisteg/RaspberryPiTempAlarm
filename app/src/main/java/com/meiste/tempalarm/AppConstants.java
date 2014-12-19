@@ -19,7 +19,7 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
 
-public class AppContants {
+public class AppConstants {
     public static final String GCM_SENDER_ID = "233631917633";
     public static final String CLIENT_AUDIENCE =
             "server:client_id:233631917633-guka8vakql5qnni9j519jh7tl8brnqjt.apps.googleusercontent.com";

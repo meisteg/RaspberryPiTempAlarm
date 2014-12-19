@@ -33,7 +33,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.greg.gcm.GCMHelper;
-import com.meiste.tempalarm.AppContants;
+import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.registration.Registration;
 import com.meiste.tempalarm.provider.RasPiContract;
@@ -68,7 +68,7 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
         if (checkPlayServices()) {
             final GoogleAccountCredential credential = AccountUtils.getCredential(this);
             if (credential.getSelectedAccountName() != null) {
-                GCMHelper.registerIfNeeded(getApplicationContext(), AppContants.GCM_SENDER_ID, this);
+                GCMHelper.registerIfNeeded(getApplicationContext(), AppConstants.GCM_SENDER_ID, this);
             } else {
                 startActivityForResult(credential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
             }
@@ -174,8 +174,8 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
         Timber.d("Device registered with GCM: regId = " + regId);
 
         if (mRegService == null) {
-            mRegService = new Registration.Builder(AppContants.HTTP_TRANSPORT,
-                    AppContants.JSON_FACTORY, AccountUtils.getCredential(this))
+            mRegService = new Registration.Builder(AppConstants.HTTP_TRANSPORT,
+                    AppConstants.JSON_FACTORY, AccountUtils.getCredential(this))
                     .setApplicationName(context.getString(R.string.app_name))
                     .build();
         }

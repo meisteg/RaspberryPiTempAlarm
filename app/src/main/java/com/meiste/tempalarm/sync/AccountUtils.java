@@ -27,7 +27,7 @@ import android.text.TextUtils;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.meiste.tempalarm.AppContants;
+import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.provider.RasPiContract;
 
 public class AccountUtils {
@@ -37,7 +37,7 @@ public class AccountUtils {
     public static synchronized GoogleAccountCredential getCredential(final Context context) {
         if (sCredential == null) {
             sCredential = GoogleAccountCredential.usingAudience(context.getApplicationContext(),
-                    AppContants.CLIENT_AUDIENCE);
+                    AppConstants.CLIENT_AUDIENCE);
             sCredential.setSelectedAccountName(AccountUtils.getAccountName(context));
         }
         return sCredential;
@@ -45,7 +45,7 @@ public class AccountUtils {
 
     public static synchronized String getAccountName(final Context context) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        final String account = prefs.getString(AppContants.PREF_ACCOUNT_NAME, null);
+        final String account = prefs.getString(AppConstants.PREF_ACCOUNT_NAME, null);
 
         if (TextUtils.isEmpty(account)) {
             // Account not setup at all
@@ -63,7 +63,7 @@ public class AccountUtils {
 
         // Account setup, but no longer present on system
         final SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(AppContants.PREF_ACCOUNT_NAME, null);
+        editor.putString(AppConstants.PREF_ACCOUNT_NAME, null);
         editor.apply();
 
         return null;
@@ -71,7 +71,7 @@ public class AccountUtils {
 
     public static synchronized Account getAccount(final Context context) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        final String account = prefs.getString(AppContants.PREF_ACCOUNT_NAME, null);
+        final String account = prefs.getString(AppConstants.PREF_ACCOUNT_NAME, null);
         final AccountManager mgr = AccountManager.get(context);
         final Account[] accounts = mgr.getAccountsByType(GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE);
 
@@ -86,7 +86,7 @@ public class AccountUtils {
 
     public static synchronized void setAccount(final Context context, final String accountName) {
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        final String oldAccountName = prefs.getString(AppContants.PREF_ACCOUNT_NAME, null);
+        final String oldAccountName = prefs.getString(AppConstants.PREF_ACCOUNT_NAME, null);
 
         if (!TextUtils.isEmpty(oldAccountName)) {
             final Account oldAccount = getAccount(context);
@@ -95,7 +95,7 @@ public class AccountUtils {
         }
 
         final SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(AppContants.PREF_ACCOUNT_NAME, accountName);
+        editor.putString(AppConstants.PREF_ACCOUNT_NAME, accountName);
         editor.apply();
 
         final Account account = getAccount(context);
@@ -107,7 +107,7 @@ public class AccountUtils {
         // Recommend a schedule for automatic synchronization. The system may modify this based
         // on other scheduled syncs and network utilization.
         ContentResolver.addPeriodicSync(account, RasPiContract.CONTENT_AUTHORITY,
-                new Bundle(), AppContants.AUTO_SYNC_FREQUENCY);
+                new Bundle(), AppConstants.AUTO_SYNC_FREQUENCY);
 
         if (sCredential != null) {
             sCredential.setSelectedAccountName(accountName);

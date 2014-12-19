@@ -26,11 +26,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import com.meiste.tempalarm.AppContants;
+import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.temperature.Temperature;
 import com.meiste.tempalarm.backend.temperature.model.CollectionResponseTemperatureRecord;
-import com.meiste.tempalarm.backend.temperature.model.SettingRecord;
 import com.meiste.tempalarm.backend.temperature.model.TemperatureRecord;
 import com.meiste.tempalarm.provider.RasPiContract;
 
@@ -80,8 +79,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         super(context, autoInitialize);
         Timber.d("Creating sync adapter");
 
-        mTempService = new Temperature.Builder(AppContants.HTTP_TRANSPORT,
-                AppContants.JSON_FACTORY, AccountUtils.getCredential(context))
+        mTempService = new Temperature.Builder(AppConstants.HTTP_TRANSPORT,
+                AppConstants.JSON_FACTORY, AccountUtils.getCredential(context))
                 .setApplicationName(context.getString(R.string.app_name))
                 .build();
     }
