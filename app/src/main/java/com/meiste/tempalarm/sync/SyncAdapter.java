@@ -19,12 +19,17 @@ package com.meiste.tempalarm.sync;
 import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.SyncResult;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
@@ -34,11 +39,22 @@ import com.meiste.tempalarm.backend.temperature.model.TemperatureRecord;
 import com.meiste.tempalarm.provider.RasPiContract;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import timber.log.Timber;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
+
+    private static final String[] PROJECTION = new String[] {
+            RasPiContract.RasPiReport._ID,
+            RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP
+    };
+
+    // Constants representing column positions from PROJECTION.
+    public static final int COLUMN_ID = 0;
+    public static final int COLUMN_TIMESTAMP = 1;
 
     private final Temperature mTempService;
 
@@ -88,19 +104,76 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(final Account account, final Bundle extras, final String authority,
                               final ContentProviderClient provider, final SyncResult syncResult) {
-        Timber.d("Beginning network sync for " + account.name);
+        final boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
+        Timber.i("Beginning %s sync for %s", expedited ? "immediate" : "normal", account.name);
 
+        // TODO: Only sync if enough time has passed
+
+        final ContentResolver contentResolver = getContext().getContentResolver();
+        final ArrayList<ContentProviderOperation> batch = new ArrayList<>();
         try {
-            // TODO: Store temperature records
+            // TODO Remove limit of 10 on query once quotas are checked
             final CollectionResponseTemperatureRecord tempCollection = mTempService.get(10).execute();
             final List<TemperatureRecord> records = tempCollection.getItems();
+            Timber.d("Downloaded %s records", records.size());
+
+            // Build hash table of incoming entries
+            final HashMap<Long, TemperatureRecord> recordMap = new HashMap<>();
             for (final TemperatureRecord record : records) {
-                Timber.i("%s: temp=%s, light=%s", record.getTimestamp(), record.getDegF(), record.getLight());
+                recordMap.put(record.getTimestamp(), record);
             }
+
+            final Uri uri = RasPiContract.RasPiReport.CONTENT_URI;
+            final Cursor c = contentResolver.query(uri, PROJECTION, null, null, null);
+            Timber.d("Found %s local records. Computing merge solution...", c.getCount());
+
+            int id;
+            long timestamp;
+            while (c.moveToNext()) {
+                syncResult.stats.numEntries++;
+                id = c.getInt(COLUMN_ID);
+                timestamp = c.getLong(COLUMN_TIMESTAMP);
+                final TemperatureRecord match = recordMap.get(timestamp);
+                if (match != null) {
+                    // Entry exists. Remove from entry map to prevent insert later.
+                    recordMap.remove(timestamp);
+                    // No need to check if record is updated since server will never update them
+                } else {
+                    // Entry doesn't exist. Remove it from the database.
+                    final Uri deleteUri = RasPiContract.RasPiReport.CONTENT_URI.buildUpon()
+                            .appendPath(Integer.toString(id)).build();
+                    Timber.v("Scheduling delete of record %s", timestamp);
+                    batch.add(ContentProviderOperation.newDelete(deleteUri).build());
+                    syncResult.stats.numDeletes++;
+                }
+            }
+            c.close();
+
+            // Add new items
+            for (final TemperatureRecord record : recordMap.values()) {
+                Timber.v("Scheduling insert of record %s", record.getTimestamp());
+                batch.add(ContentProviderOperation.newInsert(RasPiContract.RasPiReport.CONTENT_URI)
+                        .withValue(RasPiContract.RasPiReport.COLUMN_NAME_DEGF, record.getFloatDegF())
+                        .withValue(RasPiContract.RasPiReport.COLUMN_NAME_LIGHT, record.getLight())
+                        .withValue(RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP, record.getTimestamp())
+                        .build());
+                syncResult.stats.numInserts++;
+            }
+
+            Timber.d("Merge solution ready. Applying batch update");
+            contentResolver.applyBatch(RasPiContract.CONTENT_AUTHORITY, batch);
+            contentResolver.notifyChange(
+                    RasPiContract.RasPiReport.CONTENT_URI, // URI where data was modified
+                    null,                                  // No local observer
+                    false);                                // Do not sync to network
         } catch (final IOException e) {
             Timber.e("Failed to download temperature records");
+            syncResult.stats.numIoExceptions++;
+        } catch (final RemoteException | OperationApplicationException e) {
+            Timber.e("Failed to update database");
+            syncResult.databaseError = true;
         }
 
-        Timber.d("Network synchronization complete");
+        Timber.i("Network synchronization complete");
     }
 }

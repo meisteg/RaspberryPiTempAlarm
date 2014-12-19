@@ -47,11 +47,6 @@ public class RasPiContract {
         public static final String COLUMN_NAME_LIGHT = "light";
         public static final String COLUMN_NAME_TIMESTAMP = "timestamp";
 
-        public static final int COLUMN_ID = 0;
-        public static final int COLUMN_DEGF= 1;
-        public static final int COLUMN_LIGHT = 2;
-        public static final int COLUMN_TIMESTAMP = 3;
-
         public static final String SORT_OLDEST_FIRST = COLUMN_NAME_TIMESTAMP + " ASC";
         public static final String SORT_NEWEST_FIRST = COLUMN_NAME_TIMESTAMP + " DESC";
     }
