@@ -15,11 +15,13 @@
  */
 package com.meiste.tempalarm.backend;
 
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
 @Entity
+@Cache
 public class TemperatureRecord {
 
     @Id
@@ -40,6 +42,10 @@ public class TemperatureRecord {
 
     public String getDegF() {
         return String.format("%.1f", degF);
+    }
+
+    public float getFloatDegF() {
+        return degF;
     }
 
     public void setDegF(final float degF) {
