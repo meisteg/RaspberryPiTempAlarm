@@ -39,7 +39,7 @@ public class RasPiContract {
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.raspi.report";
 
         public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath("races").build();
+                BASE_CONTENT_URI.buildUpon().appendPath("reports").build();
 
         public static final String TABLE_NAME = "reports";
 
