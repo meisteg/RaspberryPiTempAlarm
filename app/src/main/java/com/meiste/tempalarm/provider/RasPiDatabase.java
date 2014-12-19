@@ -20,6 +20,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import timber.log.Timber;
+
 /**
  * SQLite backend for @{link RasPiProvider}.
  *
@@ -28,7 +30,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class RasPiDatabase extends SQLiteOpenHelper {
     /** Schema version. */
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "raspi.db";
@@ -37,7 +39,7 @@ public class RasPiDatabase extends SQLiteOpenHelper {
     private static final String SQL_CREATE_REPORTS =
             "CREATE TABLE " + RasPiContract.RasPiReport.TABLE_NAME + " (" +
                     RasPiContract.RasPiReport._ID + " INTEGER PRIMARY KEY," +
-                    RasPiContract.RasPiReport.COLUMN_NAME_DEGF + " INTEGER," +
+                    RasPiContract.RasPiReport.COLUMN_NAME_DEGF + " REAL," +
                     RasPiContract.RasPiReport.COLUMN_NAME_LIGHT + " INTEGER," +
                     RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP + " INTEGER)";
 
@@ -51,11 +53,14 @@ public class RasPiDatabase extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(final SQLiteDatabase db) {
+        Timber.d("Creating database");
         db.execSQL(SQL_CREATE_REPORTS);
     }
 
     @Override
     public void onUpgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
+        Timber.d("Upgrading database from version %s to version %s", oldVersion, newVersion);
+
         // Upgrade policy is to simply to discard the data and start over
         db.execSQL(SQL_DELETE_REPORTS);
         onCreate(db);
