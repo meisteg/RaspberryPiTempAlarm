@@ -23,6 +23,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -30,11 +31,13 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.backend.temperature.Temperature;
 import com.meiste.tempalarm.backend.temperature.model.CollectionResponseTemperatureRecord;
+import com.meiste.tempalarm.backend.temperature.model.SettingRecord;
 import com.meiste.tempalarm.backend.temperature.model.TemperatureRecord;
 import com.meiste.tempalarm.provider.RasPiContract;
 
@@ -107,8 +110,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         final boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
         Timber.i("Beginning %s sync for %s", expedited ? "immediate" : "normal", account.name);
 
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+
         // TODO: Only sync if enough time has passed
 
+        final SharedPreferences.Editor editor = prefs.edit();
         final ContentResolver contentResolver = getContext().getContentResolver();
         final ArrayList<ContentProviderOperation> batch = new ArrayList<>();
         try {
@@ -166,6 +172,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     RasPiContract.RasPiReport.CONTENT_URI, // URI where data was modified
                     null,                                  // No local observer
                     false);                                // Do not sync to network
+
+            // Do some more things if this is not a quick update
+            if (!expedited) {
+                // Get light threshold from server
+                final SettingRecord lightSetting = mTempService.getLightThreshold().execute();
+                final int lightThres = Integer.valueOf(lightSetting.getValue());
+                Timber.d("Light threshold is %s", lightThres);
+                editor.putInt(AppConstants.PREF_THRES_LIGHT, lightThres);
+            }
+
+            editor.putLong(AppConstants.PREF_LAST_SYNC, System.currentTimeMillis());
+            editor.apply();
         } catch (final IOException e) {
             Timber.e("Failed to download temperature records");
             syncResult.stats.numIoExceptions++;

@@ -111,6 +111,20 @@ public class TemperatureEndpoint {
         return CollectionResponse.<TemperatureRecord>builder().setItems(records).build();
     }
 
+    /**
+     * Query the light threshold setting
+     *
+     * @return The threshold value for lights on/off
+     */
+    @ApiMethod(
+            name = "getLightThreshold",
+            path = "getLightThreshold"
+    )
+    public SettingRecord getLightThreshold() {
+        return SettingUtils.getSettingRecord(Constants.SETTING_THRES_LIGHT,
+                Constants.DEFAULT_THRES_LIGHT);
+    }
+
     private static float getLowTempThreshold() {
         return Float.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LOW,
                 Constants.DEFAULT_THRES_LOW));
