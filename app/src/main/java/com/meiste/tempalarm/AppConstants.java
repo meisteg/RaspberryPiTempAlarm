@@ -26,6 +26,7 @@ public class AppConstants {
 
     public static final String PREF_ACCOUNT_NAME = "account_name";
     public static final String PREF_LAST_SYNC = "last_sync";
+    public static final String PREF_REPORT_RATE = "report_rate";
     public static final String PREF_THRES_LIGHT = "thres.light";
 
     public static final int AUTO_SYNC_FREQUENCY = 3600; // 1 hour (in seconds)

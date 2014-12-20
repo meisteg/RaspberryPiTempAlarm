@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
 
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
@@ -112,7 +113,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        // TODO: Only sync if enough time has passed
+        // Should we sync?
+        final long delta = System.currentTimeMillis() - prefs.getLong(AppConstants.PREF_LAST_SYNC, 0);
+        if (!expedited && (delta < prefs.getLong(AppConstants.PREF_REPORT_RATE, 0))) {
+            Timber.i("Aborting due to recent sync");
+            return;
+        }
 
         final SharedPreferences.Editor editor = prefs.edit();
         final ContentResolver contentResolver = getContext().getContentResolver();
@@ -175,11 +181,17 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Do some more things if this is not a quick update
             if (!expedited) {
-                // Get light threshold from server
+                // Get light threshold from backend
                 final SettingRecord lightSetting = mTempService.getLightThreshold().execute();
                 final int lightThres = Integer.valueOf(lightSetting.getValue());
-                Timber.d("Light threshold is %s", lightThres);
                 editor.putInt(AppConstants.PREF_THRES_LIGHT, lightThres);
+
+                // Get report rate (in seconds) from backend
+                final SettingRecord rateSetting = mTempService.getReportRate().execute();
+                final int reportRate = Integer.valueOf(rateSetting.getValue());
+                editor.putLong(AppConstants.PREF_REPORT_RATE, reportRate * DateUtils.SECOND_IN_MILLIS);
+
+                Timber.d("lightThres = %s, reportRate = %s seconds", lightThres, reportRate);
             }
 
             editor.putLong(AppConstants.PREF_LAST_SYNC, System.currentTimeMillis());
