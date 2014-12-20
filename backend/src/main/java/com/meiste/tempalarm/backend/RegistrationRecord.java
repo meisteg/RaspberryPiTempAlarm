@@ -50,6 +50,10 @@ public class RegistrationRecord {
         this.regId = regId;
     }
 
+    public String getUserEmail() {
+        return userEmail;
+    }
+
     public void setUserEmail(final String userEmail) {
         this.userEmail = userEmail;
     }

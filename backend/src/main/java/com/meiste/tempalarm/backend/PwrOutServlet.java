@@ -28,8 +28,8 @@ public class PwrOutServlet extends HttpServlet {
             throws IOException {
         SettingUtils.setValue(Constants.SETTING_TASK_NAME, Constants.DEFAULT_TASK_NAME);
 
-        // TODO: Need to also send email
         Gcm.sendMessage("Power Outage!");
+        AlertEmail.sendPwrOut();
 
         resp.setStatus(HttpServletResponse.SC_OK);
     }

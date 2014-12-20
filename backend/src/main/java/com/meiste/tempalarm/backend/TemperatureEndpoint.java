@@ -67,17 +67,28 @@ public class TemperatureEndpoint {
     @ApiMethod(name = "report")
     public void report(@Named("temperature") final float temperature,
                        @Named("light") final int light) throws IOException {
-        log.fine("temperature=" + temperature + ", light=" + light);
+        // Retrieve last reported temperature from datastore
+        final TemperatureRecord prevRecord = ofy().load().type(TemperatureRecord.class)
+                .order("-timestamp").limit(1).first().now();
+        final float prevTemp = (prevRecord != null) ? prevRecord.getFloatDegF() : Float.NaN;
+
+        log.fine("prevTemp=" + prevTemp + ", newTemp=" + temperature + ", light=" + light);
 
         final TemperatureRecord record = new TemperatureRecord();
         record.setDegF(temperature);
         record.setLight(light);
         ofy().save().entity(record).now();
 
-        // TODO: Only send GCM on first report below threshold
-        // TODO: Send email
-        if (temperature < getLowTempThreshold()) {
+        final float lowTempThreshold = getLowTempThreshold();
+        if (!isTaskRunning()) {
+            Gcm.sendMessage("Temperature reporting is running");
+            AlertEmail.sendRunning(record.getDegF());
+        } else if ((temperature < lowTempThreshold) && (prevTemp >= lowTempThreshold)) {
             Gcm.sendMessage("Temperature is " + record.getDegF() + " degrees");
+            AlertEmail.sendLowTemp(record.getDegF());
+        } else if ((temperature >= lowTempThreshold) && (prevTemp < lowTempThreshold)) {
+            Gcm.sendMessage("Temperature is " + record.getDegF() + " degrees");
+            AlertEmail.sendNormTemp(record.getDegF());
         }
 
         // Add the power outage monitor task to the default queue, removing previously
@@ -98,6 +109,7 @@ public class TemperatureEndpoint {
     public void stop() throws IOException {
         deletePrevTask();
         Gcm.sendMessage("Temperature reporting has stopped");
+        AlertEmail.sendStopped();
     }
 
     /**
@@ -146,6 +158,12 @@ public class TemperatureEndpoint {
                 Constants.SETTING_REPORT_RATE, Constants.DEFAULT_REPORT_RATE));
         return (rate * Constants.REPORTS_MISSED_BEFORE_ALARM * Constants.SECOND_IN_MILLIS) +
                 Constants.MINUTE_IN_MILLIS;
+    }
+
+    private static boolean isTaskRunning() {
+        final String prevTask = SettingUtils.getSettingValue(Constants.SETTING_TASK_NAME,
+                Constants.DEFAULT_TASK_NAME);
+        return !prevTask.equals(Constants.DEFAULT_TASK_NAME);
     }
 
     private static void deletePrevTask() {
