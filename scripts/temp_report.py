@@ -156,10 +156,9 @@ def init():
   print "Initializing server API"
   http = httplib2.Http()
   try:
-    service = build(SERVER_API, SERVER_API_VER, http=http,
+    endpoint = build(SERVER_API, SERVER_API_VER, http=http,
                     discoveryServiceUrl=(SERVER_URL + "/_ah/api/discovery/v1/apis/" +
                                          SERVER_API + "/" + SERVER_API_VER + "/rest"))
-    endpoint = service.temperatureEndpoint()
 
     if DEBUG:
       print "Using accelerated report rate for debugging"

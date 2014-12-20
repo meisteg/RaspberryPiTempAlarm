@@ -49,6 +49,10 @@ public class TemperatureEndpoint {
      *
      * @return The rate the temperature should be reported to the backend
      */
+    @ApiMethod(
+            name = "getReportRate",
+            path = "getReportRate"
+    )
     public SettingRecord getReportRate() {
         return SettingUtils.getSettingRecord(Constants.SETTING_REPORT_RATE,
                 Constants.DEFAULT_REPORT_RATE);
@@ -60,6 +64,7 @@ public class TemperatureEndpoint {
      * @param temperature The current temperature in degrees fahrenheit
      * @param light       The current light level measured by RC circuit
      */
+    @ApiMethod(name = "report")
     public void report(@Named("temperature") final float temperature,
                        @Named("light") final int light) throws IOException {
         log.fine("temperature=" + temperature + ", light=" + light);
@@ -89,6 +94,7 @@ public class TemperatureEndpoint {
     /**
      * Notifies the backend that temperature reporting has stopped.
      */
+    @ApiMethod(name = "stop")
     public void stop() throws IOException {
         deletePrevTask();
         Gcm.sendMessage("Temperature reporting has stopped");
