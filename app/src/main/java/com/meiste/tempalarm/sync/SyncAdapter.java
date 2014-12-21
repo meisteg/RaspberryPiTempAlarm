@@ -124,8 +124,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         final ContentResolver contentResolver = getContext().getContentResolver();
         final ArrayList<ContentProviderOperation> batch = new ArrayList<>();
         try {
-            // TODO Remove limit of 10 on query once quotas are checked
-            final CollectionResponseTemperatureRecord tempCollection = mTempService.get(10).execute();
+            final CollectionResponseTemperatureRecord tempCollection = mTempService.get(0).execute();
             final List<TemperatureRecord> records = tempCollection.getItems();
             Timber.d("Downloaded %s records", records.size());
 
