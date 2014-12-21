@@ -138,6 +138,8 @@ public class CurrentTemp extends ActionBarActivity
                 return false;
             }
         });
+        final View header = getLayoutInflater().inflate(R.layout.record_header, mListView, false);
+        mListView.addHeaderView(header, null, false);
         mListView.setAdapter(mAdapter);
         getLoaderManager().initLoader(0, null, this);
     }
