@@ -15,6 +15,8 @@
  */
 package com.meiste.tempalarm;
 
+import android.text.format.DateUtils;
+
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
@@ -30,6 +32,13 @@ public class AppConstants {
     public static final String PREF_THRES_LIGHT = "thres.light";
 
     public static final int AUTO_SYNC_FREQUENCY = 3600; // 1 hour (in seconds)
+
+    public static final int DATE_FORMAT_FLAGS =
+            DateUtils.FORMAT_SHOW_DATE |
+            DateUtils.FORMAT_NO_YEAR |
+            DateUtils.FORMAT_SHOW_TIME |
+            DateUtils.FORMAT_NO_NOON |
+            DateUtils.FORMAT_NO_MIDNIGHT;
 
     public static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
     public static final AndroidJsonFactory JSON_FACTORY = new AndroidJsonFactory();

@@ -18,16 +18,27 @@ package com.meiste.tempalarm.ui;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Dialog;
+import android.app.LoaderManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
+import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
+import android.database.Cursor;
+import android.preference.PreferenceManager;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -42,22 +53,92 @@ import com.meiste.tempalarm.sync.SyncAdapter;
 
 import java.io.IOException;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import timber.log.Timber;
 
-public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmRegistrationListener {
+public class CurrentTemp extends ActionBarActivity
+        implements GCMHelper.OnGcmRegistrationListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int GPS_REQUEST = 1337;
     private static final int ACCOUNT_PICKER_REQUEST = 1338;
+
+    /**
+     * Projection for querying the content provider.
+     */
+    private static final String[] PROJECTION = new String[]{
+            RasPiContract.RasPiReport._ID,
+            RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP,
+            RasPiContract.RasPiReport.COLUMN_NAME_DEGF,
+            RasPiContract.RasPiReport.COLUMN_NAME_LIGHT,
+    };
+
+    private static final int COLUMN_TIMESTAMP = 1;
+    private static final int COLUMN_DEGF = 2;
+    private static final int COLUMN_LIGHT = 3;
+
+    /**
+     * List of Cursor columns to read from when preparing an adapter to populate the ListView.
+     */
+    private static final String[] FROM_COLUMNS = new String[]{
+            RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP,
+            RasPiContract.RasPiReport.COLUMN_NAME_DEGF,
+            RasPiContract.RasPiReport.COLUMN_NAME_LIGHT,
+    };
+
+    /**
+     * List of Views which will be populated by Cursor data.
+     */
+    private static final int[] TO_FIELDS = new int[]{
+            R.id.timestamp,
+            R.id.degF,
+            R.id.lights,
+    };
 
     private Dialog mDialog;
     private Registration mRegService;
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
+    private SimpleCursorAdapter mAdapter;
+    private int mLightThreshold;
+
+    @InjectView(R.id.temp_list)
+    protected ListView mListView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.current_temp);
+        ButterKnife.inject(this);
+
+        mAdapter = new SimpleCursorAdapter(this, R.layout.record, null, FROM_COLUMNS, TO_FIELDS, 0);
+        mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(final View view, final Cursor cursor, final int columnIndex) {
+                final TextView textView = (TextView) view;
+                switch (columnIndex) {
+                    case COLUMN_TIMESTAMP:
+                        // Convert timestamp to human-readable date
+                        textView.setText(DateUtils.formatDateTime(getApplicationContext(),
+                                cursor.getLong(columnIndex), AppConstants.DATE_FORMAT_FLAGS));
+                        return true;
+                    case COLUMN_DEGF:
+                        // Restrict to one decimal place
+                        textView.setText(String.format("%.1f", cursor.getFloat(columnIndex)));
+                        return true;
+                    case COLUMN_LIGHT:
+                        if (cursor.getInt(columnIndex) < mLightThreshold) {
+                            textView.setText(getText(R.string.lights_on));
+                        } else {
+                            textView.setText(getText(R.string.lights_off));
+                        }
+                        return true;
+                }
+                return false;
+            }
+        });
+        mListView.setAdapter(mAdapter);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -240,4 +321,47 @@ public class CurrentTemp extends ActionBarActivity implements GCMHelper.OnGcmReg
             });
         }
     };
+
+    /**
+     * Query the content provider for data.
+     *
+     * <p>Loaders do queries in a background thread. They also provide a ContentObserver that is
+     * triggered when data in the content provider changes. When the sync adapter updates the
+     * content provider, the ContentObserver responds by resetting the loader and then reloading
+     * it.
+     */
+    @Override
+    public Loader<Cursor> onCreateLoader(final int id, final Bundle bundle) {
+        return new CursorLoader(
+                this,                                        // Context
+                RasPiContract.RasPiReport.CONTENT_URI,       // URI
+                PROJECTION,                                  // Projection
+                null,                                        // Selection
+                null,                                        // Selection args
+                RasPiContract.RasPiReport.SORT_NEWEST_FIRST  // Sort
+        );
+    }
+
+    /**
+     * Move the Cursor returned by the query into the ListView adapter. This refreshes the existing
+     * UI with the data in the Cursor.
+     */
+    @Override
+    public void onLoadFinished(final Loader<Cursor> loader, final Cursor cursor) {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mLightThreshold = prefs.getInt(AppConstants.PREF_THRES_LIGHT, 0);
+
+        mAdapter.changeCursor(cursor);
+    }
+
+    /**
+     * Called when the ContentObserver defined for the content provider detects that data has
+     * changed. The ContentObserver resets the loader, and then re-runs the loader. In the adapter,
+     * set the Cursor value to null. This removes the reference to the Cursor, allowing it to be
+     * garbage-collected.
+     */
+    @Override
+    public void onLoaderReset(final Loader<Cursor> loader) {
+        mAdapter.changeCursor(null);
+    }
 }
