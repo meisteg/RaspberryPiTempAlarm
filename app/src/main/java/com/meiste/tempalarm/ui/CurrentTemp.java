@@ -39,6 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -175,7 +176,9 @@ public class CurrentTemp extends ActionBarActivity
                 // TODO: Launch settings activity
                 return true;
             case R.id.action_refresh:
-                SyncAdapter.requestSync(this, true);
+                if (!SyncAdapter.requestSync(this, true)) {
+                    Toast.makeText(this, R.string.error_refresh, Toast.LENGTH_LONG).show();
+                }
                 return true;
         }
 

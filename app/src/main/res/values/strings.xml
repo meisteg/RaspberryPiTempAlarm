@@ -25,4 +25,6 @@
     <string name="lights_on">ON</string>
     <string name="lights_off">OFF</string>
 
+    <string name="error_refresh">Unable to refresh data</string>
+
 </resources>
