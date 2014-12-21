@@ -79,8 +79,17 @@ def quit_callback(channel):
 
   condition.acquire()
   print "Quit button pressed!"
-  should_quit = True
-  condition.notify()
+
+  # To prevent phantom stoppages due to ESD, need to verify button held a
+  # reasonable period of time
+  time.sleep(0.2)
+  should_quit = GPIO.input(channel) == GPIO.LOW
+
+  if should_quit:
+    condition.notify()
+  else:
+    print "False button press. Ignoring..."
+
   condition.release()
 
 def read_temp_raw():
