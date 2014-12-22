@@ -175,7 +175,7 @@ public class CurrentTemp extends ActionBarActivity
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                // TODO: Launch settings activity
+                startActivity(new Intent(this, Settings.class));
                 return true;
             case R.id.action_refresh:
                 if (!SyncAdapter.requestSync(this, true)) {

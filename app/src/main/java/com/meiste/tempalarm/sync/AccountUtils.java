@@ -28,6 +28,7 @@ import android.text.TextUtils;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.meiste.tempalarm.AppConstants;
+import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.provider.RasPiContract;
 
 public class AccountUtils {
@@ -106,11 +107,22 @@ public class AccountUtils {
         ContentResolver.setSyncAutomatically(account, RasPiContract.CONTENT_AUTHORITY, true);
         // Recommend a schedule for automatic synchronization. The system may modify this based
         // on other scheduled syncs and network utilization.
-        ContentResolver.addPeriodicSync(account, RasPiContract.CONTENT_AUTHORITY,
-                new Bundle(), AppConstants.AUTO_SYNC_FREQUENCY);
+        setPeriodicSync(context, account, prefs);
 
         if (sCredential != null) {
             sCredential.setSelectedAccountName(accountName);
         }
+    }
+
+    public static void setPeriodicSync(final Context context, final SharedPreferences prefs) {
+        setPeriodicSync(context, getAccount(context), prefs);
+    }
+
+    private static void setPeriodicSync(final Context context, final Account account,
+                                        final SharedPreferences prefs) {
+        final int syncFreq = Integer.valueOf(prefs.getString(AppConstants.PREF_SYNC_FREQ,
+                context.getString(R.string.pref_default_sync_frequency)));
+        ContentResolver.addPeriodicSync(account, RasPiContract.CONTENT_AUTHORITY,
+                new Bundle(), syncFreq);
     }
 }
