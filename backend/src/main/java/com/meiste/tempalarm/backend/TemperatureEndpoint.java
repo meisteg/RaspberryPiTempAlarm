@@ -81,13 +81,13 @@ public class TemperatureEndpoint {
 
         final float lowTempThreshold = getLowTempThreshold();
         if (!isTaskRunning()) {
-            Gcm.sendMessage("Temperature reporting is running");
+            Gcm.sendSensor(Gcm.SensorState.RUNNING);
             AlertEmail.sendRunning(record.getDegF());
         } else if ((temperature < lowTempThreshold) && (prevTemp >= lowTempThreshold)) {
-            Gcm.sendMessage("Temperature is " + record.getDegF() + " degrees");
+            Gcm.sendAlarm(Gcm.AlarmState.TEMP_TOO_LOW);
             AlertEmail.sendLowTemp(record.getDegF());
         } else if ((temperature >= lowTempThreshold) && (prevTemp < lowTempThreshold)) {
-            Gcm.sendMessage("Temperature is " + record.getDegF() + " degrees");
+            Gcm.sendAlarm(Gcm.AlarmState.TEMP_NORMAL);
             AlertEmail.sendNormTemp(record.getDegF());
         }
 
@@ -108,7 +108,7 @@ public class TemperatureEndpoint {
     @ApiMethod(name = "stop")
     public void stop() throws IOException {
         deletePrevTask();
-        Gcm.sendMessage("Temperature reporting has stopped");
+        Gcm.sendSensor(Gcm.SensorState.STOPPED);
         AlertEmail.sendStopped();
     }
 

@@ -29,18 +29,27 @@ public class Gcm {
 
     private static final Logger log = Logger.getLogger(Gcm.class.getSimpleName());
 
-    // TODO: Add collapseKey
-    public static void sendMessage(String message) throws IOException {
-        if (message == null || message.trim().length() == 0) {
-            log.warning("Not sending message because it is empty");
-            return;
-        }
-        // crop longer messages
-        if (message.length() > 1000) {
-            message = message.substring(0, 1000) + "[...]";
-        }
+    private static final String COLLAPSE_KEY_ALARM = "alarm";
+    private static final String COLLAPSE_KEY_SENSOR = "sensor";
+    private static final String STATE_KEY = "state";
+
+    public static enum AlarmState {
+        TEMP_TOO_LOW, TEMP_NORMAL
+    }
+    public static void sendAlarm(final AlarmState state) throws IOException {
+        send(COLLAPSE_KEY_ALARM, state.name());
+    }
+
+    public static enum SensorState {
+        STOPPED, RUNNING, PWR_OUT
+    }
+    public static void sendSensor(final SensorState state) throws IOException {
+        send(COLLAPSE_KEY_SENSOR, state.name());
+    }
+
+    private static void send(final String key, final String state) throws IOException {
         final Sender sender = new Sender(getApiKey());
-        final Message msg = new Message.Builder().addData("message", message).build();
+        final Message msg = new Message.Builder().collapseKey(key).addData(STATE_KEY, state).build();
         final List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
         for (final RegistrationRecord record : records) {
             final Result result = sender.send(msg, record.getRegId(), 5);

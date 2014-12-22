@@ -25,6 +25,17 @@ import timber.log.Timber;
 
 public class GcmIntentService extends IntentService {
 
+    private static final String MSG_KEY = "collapse_key";
+    private static final String MSG_KEY_ALARM = "alarm";
+    private static final String MSG_KEY_SENSOR = "sensor";
+
+    private static final String STATE_KEY = "state";
+    private static final String STATE_TEMP_TOO_LOW = "TEMP_TOO_LOW";
+    private static final String STATE_TEMP_NORMAL = "TEMP_NORMAL";
+    private static final String STATE_SENSOR_STOPPED = "STOPPED";
+    private static final String STATE_SENSOR_RUNNING = "RUNNING";
+    private static final String STATE_SENSOR_PWR_OUT = "PWR_OUT";
+
     public GcmIntentService() {
         super(GcmIntentService.class.getSimpleName());
     }
@@ -35,12 +46,46 @@ public class GcmIntentService extends IntentService {
         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         final String messageType = gcm.getMessageType(intent);
 
-        if (extras != null && !extras.isEmpty()) {
+        if (extras != null && !extras.isEmpty() && extras.containsKey(MSG_KEY)) {
             if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                Timber.d("GCM RECEIVED: " + extras.getString("message"));
+                final String type = extras.getString(MSG_KEY);
+                final String state = extras.getString(STATE_KEY, "UNKNOWN");
+                Timber.d("Received %s message with state %s", type, state);
+
+                switch (type) {
+                    case MSG_KEY_ALARM:
+                        handleAlarm(state);
+                        break;
+                    case MSG_KEY_SENSOR:
+                        handleSensor(state);
+                        break;
+                    default:
+                        Timber.i("Message type unknown. Ignoring.");
+                        break;
+                }
             }
         }
 
         GcmBroadcastReceiver.completeWakefulIntent(intent);
+    }
+
+    private void handleAlarm(final String state) {
+        switch (state) {
+            case STATE_TEMP_TOO_LOW:
+                break;
+            case STATE_TEMP_NORMAL:
+                break;
+        }
+    }
+
+    private void handleSensor(final String state) {
+        switch (state) {
+            case STATE_SENSOR_STOPPED:
+                break;
+            case STATE_SENSOR_RUNNING:
+                break;
+            case STATE_SENSOR_PWR_OUT:
+                break;
+        }
     }
 }
