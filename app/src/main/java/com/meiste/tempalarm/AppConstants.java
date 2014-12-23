@@ -42,6 +42,13 @@ public class AppConstants {
             DateUtils.FORMAT_SHOW_TIME |
             DateUtils.FORMAT_NO_NOON |
             DateUtils.FORMAT_NO_MIDNIGHT;
+    public static final int DATE_FORMAT_FLAGS_GRAPH =
+            DateUtils.FORMAT_NO_YEAR |
+            DateUtils.FORMAT_SHOW_TIME |
+            DateUtils.FORMAT_NO_NOON |
+            DateUtils.FORMAT_NO_MIDNIGHT;
+
+    public static final int GRAPH_NUM_HORIZONTAL_LABELS = 4;
 
     public static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
     public static final AndroidJsonFactory JSON_FACTORY = new AndroidJsonFactory();

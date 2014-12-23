@@ -37,6 +37,7 @@ import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,10 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.jjoe64.graphview.CustomLabelFormatter;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
 import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
@@ -53,6 +58,8 @@ import com.meiste.tempalarm.sync.AccountUtils;
 import com.meiste.tempalarm.sync.SyncAdapter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -102,6 +109,7 @@ public class CurrentTemp extends ActionBarActivity
     private Menu mOptionsMenu;
     private SimpleCursorAdapter mAdapter;
     private int mLightThreshold;
+    private LineGraphView mGraph;
 
     @InjectView(R.id.temp_list)
     protected ListView mListView;
@@ -138,7 +146,25 @@ public class CurrentTemp extends ActionBarActivity
                 return false;
             }
         });
+
         final View header = getLayoutInflater().inflate(R.layout.record_header, mListView, false);
+        final FrameLayout frameLayout = ButterKnife.findById(header, R.id.graph_placeholder);
+        mGraph = new LineGraphView(this, "");
+        mGraph.setDrawBackground(true);
+        mGraph.setBackgroundColor(getResources().getColor(R.color.primary_graph));
+        mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
+            @Override
+            public String formatLabel(final double value, final boolean isValueX) {
+                if (isValueX) {
+                    return DateUtils.formatDateTime(getApplicationContext(),
+                            (long) value, AppConstants.DATE_FORMAT_FLAGS_GRAPH);
+                }
+                return String.format("%.1f", value);
+            }
+        });
+        mGraph.getGraphViewStyle().setNumHorizontalLabels(AppConstants.GRAPH_NUM_HORIZONTAL_LABELS);
+        frameLayout.addView(mGraph);
+
         mListView.addHeaderView(header, null, false);
         mListView.setAdapter(mAdapter);
         getLoaderManager().initLoader(0, null, this);
@@ -356,6 +382,17 @@ public class CurrentTemp extends ActionBarActivity
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         mLightThreshold = prefs.getInt(AppConstants.PREF_THRES_LIGHT, 0);
 
+        mGraph.removeAllSeries();
+        final List<GraphView.GraphViewData> data = new ArrayList<>();
+        cursor.moveToLast();
+        while (cursor.moveToPrevious()) {
+            data.add(new GraphView.GraphViewData(cursor.getLong(COLUMN_TIMESTAMP),
+                    cursor.getFloat(COLUMN_DEGF)));
+        }
+        final GraphViewSeries exampleSeries = new GraphViewSeries(
+                data.toArray(new GraphView.GraphViewData[data.size()]));
+        mGraph.addSeries(exampleSeries);
+
         mAdapter.changeCursor(cursor);
     }
 
@@ -368,5 +405,6 @@ public class CurrentTemp extends ActionBarActivity
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
         mAdapter.changeCursor(null);
+        mGraph.removeAllSeries();
     }
 }
