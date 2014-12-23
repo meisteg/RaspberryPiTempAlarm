@@ -31,6 +31,10 @@
     <string name="lights_on">ON</string>
     <string name="lights_off">OFF</string>
 
+    <string name="alarm_low_temp">Low temperature detected!</string>
+    <string name="alarm_pwr_out">Possible power outage!</string>
+    <string name="alarm_dismiss">Dismiss</string>
+
     <string name="notify_state_running">Temperature monitoring is running</string>
     <string name="notify_state_stopped">Temperature monitoring has been stopped</string>
     <string name="notify_temp_normal">Temperature has returned to allowed range</string>

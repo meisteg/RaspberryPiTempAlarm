@@ -22,5 +22,11 @@
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
     </style>
+    
+    <style name="AlarmTheme" parent="AppTheme">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:background">@color/primary</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 
 </resources>

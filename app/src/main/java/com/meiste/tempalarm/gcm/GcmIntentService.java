@@ -26,11 +26,14 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.telephony.TelephonyManager;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.sync.SyncAdapter;
+import com.meiste.tempalarm.ui.Alarm;
 import com.meiste.tempalarm.ui.CurrentTemp;
 
 import timber.log.Timber;
@@ -73,12 +76,18 @@ public class GcmIntentService extends IntentService {
             if (ok2notify) {
                 cancelNotification();
 
+                final Intent killIntent = new Intent(AppConstants.INTENT_ACTION_KILL_ALARM);
+                LocalBroadcastManager.getInstance(this).sendBroadcastSync(killIntent);
+
+                final TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                final boolean inCall = tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+
                 switch (type) {
                     case MSG_KEY_ALARM:
-                        handleAlarm(state);
+                        handleAlarm(state, inCall);
                         break;
                     case MSG_KEY_SENSOR:
-                        handleSensor(state);
+                        handleSensor(state, inCall);
                         break;
                     default:
                         Timber.i("Message type unknown. Ignoring.");
@@ -90,9 +99,14 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    private void handleAlarm(final String state) {
+    private void handleAlarm(final String state, final boolean inCall) {
         switch (state) {
             case STATE_TEMP_TOO_LOW:
+                if (inCall) {
+                    showNotification(R.string.alarm_low_temp);
+                } else {
+                    showAlarm(R.string.alarm_low_temp);
+                }
                 break;
             case STATE_TEMP_NORMAL:
                 showNotification(R.string.notify_temp_normal);
@@ -100,7 +114,7 @@ public class GcmIntentService extends IntentService {
         }
     }
 
-    private void handleSensor(final String state) {
+    private void handleSensor(final String state, final boolean inCall) {
         switch (state) {
             case STATE_SENSOR_STOPPED:
                 showNotification(R.string.notify_state_stopped);
@@ -109,6 +123,11 @@ public class GcmIntentService extends IntentService {
                 showNotification(R.string.notify_state_running);
                 break;
             case STATE_SENSOR_PWR_OUT:
+                if (inCall) {
+                    showNotification(R.string.alarm_pwr_out);
+                } else {
+                    showAlarm(R.string.alarm_pwr_out);
+                }
                 break;
         }
     }
@@ -139,5 +158,12 @@ public class GcmIntentService extends IntentService {
         final NotificationManager nm =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nm.cancelAll();
+    }
+
+    private void showAlarm(final int resId) {
+        final Intent intent = new Intent(this, Alarm.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(AppConstants.INTENT_EXTRA_ALERT_MSG, resId);
+        startActivity(intent);
     }
 }

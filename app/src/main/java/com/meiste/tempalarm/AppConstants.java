@@ -33,6 +33,9 @@ public class AppConstants {
     public static final String PREF_SYNC_FREQ = "sync_frequency";
     public static final String PREF_THRES_LIGHT = "thres.light";
 
+    public static final String INTENT_ACTION_KILL_ALARM = "com.meiste.tempalarm.killalarm";
+    public static final String INTENT_EXTRA_ALERT_MSG = "msg_resid";
+
     public static final int DATE_FORMAT_FLAGS =
             DateUtils.FORMAT_SHOW_DATE |
             DateUtils.FORMAT_NO_YEAR |
