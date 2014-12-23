@@ -18,6 +18,8 @@ package com.meiste.tempalarm;
 
 import android.app.Application;
 
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
 public class RasPiApplication extends Application {
@@ -26,9 +28,13 @@ public class RasPiApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        // logging setup
         if (BuildConfig.DEBUG) {
+            // Logging setup
             Timber.plant(new Timber.DebugTree());
+        } else {
+            // Crash reporting
+            Fabric.with(this, new Crashlytics());
+            Timber.plant(new CrashlyticsTree());
         }
 
         Timber.v("Application created");
