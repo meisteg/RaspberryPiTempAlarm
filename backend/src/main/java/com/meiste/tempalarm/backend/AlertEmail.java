@@ -49,27 +49,42 @@ public class AlertEmail {
     private static final String FOOTER = "\n\nhttp://rasptempalarm.appspot.com";
 
     public static boolean sendLowTemp(final String temp) {
-        return send(SUBJECT_LOW_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
+        return sendToAll(SUBJECT_LOW_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
     }
 
     public static boolean sendNormTemp(final String temp) {
-        return send(SUBJECT_NORM_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
+        return sendToAll(SUBJECT_NORM_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
     }
 
     public static boolean sendPwrOut() {
-        return send(SUBJECT_PWR_OUT, BODY_PWR_OUT);
+        return sendToAll(SUBJECT_PWR_OUT, BODY_PWR_OUT);
     }
 
     public static boolean sendRunning(final String temp) {
-        return send(SUBJECT_RUNNING, String.format(BODY_TEMP_TEMPLATE, temp));
+        return sendToAll(SUBJECT_RUNNING, String.format(BODY_TEMP_TEMPLATE, temp));
     }
 
     public static boolean sendStopped() {
-        return send(SUBJECT_STOPPED, BODY_STOPPED);
+        return sendToAll(SUBJECT_STOPPED, BODY_STOPPED);
     }
 
-    public static boolean send(final String subject, final String body) {
+    public static boolean sendToAll(final String subject, final String body) {
+        return sendTo(subject, body, getRecipients());
+    }
+
+    public static boolean sendToAdmins(final String subject, final String body) {
+        try {
+            return sendTo(subject, body, new InternetAddress("admins"));
+        } catch (final AddressException e) {
+            log.severe("Failed to send message: " + e);
+            return false;
+        }
+    }
+
+    private static boolean sendTo(final String subject, final String body,
+                                  final InternetAddress... recipients) {
         if ((subject == null) || (body == null)) {
+            log.warning("Subject or Body is null");
             return false;
         }
 
@@ -78,7 +93,7 @@ public class AlertEmail {
         final Message msg = new MimeMessage(session);
         try {
             msg.setFrom(new InternetAddress("greg.meiste@gmail.com", "RasPi Temp Alarm"));
-            msg.addRecipients(Message.RecipientType.BCC, getRecipients());
+            msg.addRecipients(Message.RecipientType.BCC, recipients);
             msg.setSubject(subject);
             msg.setText(body + FOOTER);
             Transport.send(msg);

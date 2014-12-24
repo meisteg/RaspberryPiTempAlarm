@@ -61,4 +61,9 @@ public class RegistrationRecord {
     public void setTimestamp() {
         this.timestamp = System.currentTimeMillis();
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%s] %s: %s", timestamp, getUserEmail(), getRegId());
+    }
 }

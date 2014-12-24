@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cronentries>
+    <cron>
+        <url>/tasks/cleanup</url>
+        <description>Weekly cleanup of old device registrations</description>
+        <schedule>every thursday 03:00</schedule>
+        <timezone>America/Chicago</timezone>
+    </cron>
+</cronentries>

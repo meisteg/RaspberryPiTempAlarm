@@ -8,6 +8,7 @@
         <filter-name>ObjectifyFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
     <servlet>
         <servlet-name>SystemServiceServlet</servlet-name>
         <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
@@ -19,12 +20,21 @@
         </init-param>
     </servlet>
     <servlet>
+        <servlet-name>DeviceCleanupServlet</servlet-name>
+        <servlet-class>com.meiste.tempalarm.backend.DeviceCleanupServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>PwrOutServlet</servlet-name>
         <servlet-class>com.meiste.tempalarm.backend.PwrOutServlet</servlet-class>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>SystemServiceServlet</servlet-name>
         <url-pattern>/_ah/spi/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeviceCleanupServlet</servlet-name>
+        <url-pattern>/tasks/cleanup</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>PwrOutServlet</servlet-name>
