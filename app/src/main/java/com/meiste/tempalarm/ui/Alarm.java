@@ -61,16 +61,18 @@ public class Alarm extends ActionBarActivity {
     protected TextView mAlertMsg;
 
     private static final int KILLER = 1000;
-    private Handler mHandler = new Handler() {
-        public void handleMessage(final Message msg) {
+    private Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(final Message msg) {
             switch (msg.what) {
                 case KILLER:
                     Timber.i("Alarm killer triggered");
                     finish();
-                    break;
+                    return true;
             }
+            return false;
         }
-    };
+    });
 
     private BroadcastReceiver mKillReceiver = new BroadcastReceiver() {
         @Override
