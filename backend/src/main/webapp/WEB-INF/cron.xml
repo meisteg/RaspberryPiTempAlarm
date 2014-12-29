@@ -6,4 +6,10 @@
         <schedule>every thursday 03:00</schedule>
         <timezone>America/Chicago</timezone>
     </cron>
+    <cron>
+        <url>/tasks/cleanup_temp</url>
+        <description>Daily cleanup of temperature data</description>
+        <schedule>every day 02:00</schedule>
+        <timezone>America/Chicago</timezone>
+    </cron>
 </cronentries>

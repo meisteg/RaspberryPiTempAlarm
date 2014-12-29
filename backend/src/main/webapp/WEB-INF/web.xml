@@ -27,6 +27,10 @@
         <servlet-name>PwrOutServlet</servlet-name>
         <servlet-class>com.meiste.tempalarm.backend.PwrOutServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TempCleanupServlet</servlet-name>
+        <servlet-class>com.meiste.tempalarm.backend.TempCleanupServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>SystemServiceServlet</servlet-name>
@@ -39,6 +43,10 @@
     <servlet-mapping>
         <servlet-name>PwrOutServlet</servlet-name>
         <url-pattern>/tasks/pwr_out</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TempCleanupServlet</servlet-name>
+        <url-pattern>/tasks/cleanup_temp</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>
