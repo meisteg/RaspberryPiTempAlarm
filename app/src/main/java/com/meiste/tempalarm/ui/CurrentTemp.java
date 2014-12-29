@@ -60,6 +60,7 @@ import com.meiste.tempalarm.sync.SyncAdapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -159,7 +160,7 @@ public class CurrentTemp extends ActionBarActivity
                     return DateUtils.formatDateTime(getApplicationContext(),
                             (long) value, AppConstants.DATE_FORMAT_FLAGS_GRAPH);
                 }
-                return String.format("%.1f", value);
+                return String.format(Locale.getDefault(), "%.1f", value);
             }
         });
         mGraph.getGraphViewStyle().setNumHorizontalLabels(AppConstants.GRAPH_NUM_HORIZONTAL_LABELS);
