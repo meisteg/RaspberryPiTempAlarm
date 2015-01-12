@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class GcmIntentService extends IntentService {
                 if (inCall) {
                     showNotification(R.string.alarm_low_temp);
                 } else {
-                    showAlarm(R.string.alarm_low_temp);
+                    showAlarm(this, R.string.alarm_low_temp);
                 }
                 break;
             case STATE_TEMP_NORMAL:
@@ -126,7 +126,7 @@ public class GcmIntentService extends IntentService {
                 if (inCall) {
                     showNotification(R.string.alarm_pwr_out);
                 } else {
-                    showAlarm(R.string.alarm_pwr_out);
+                    showAlarm(this, R.string.alarm_pwr_out);
                 }
                 break;
         }
@@ -160,10 +160,10 @@ public class GcmIntentService extends IntentService {
         nm.cancelAll();
     }
 
-    private void showAlarm(final int resId) {
-        final Intent intent = new Intent(this, Alarm.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    static void showAlarm(final Context context, final int resId) {
+        final Intent intent = new Intent(context, Alarm.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(AppConstants.INTENT_EXTRA_ALERT_MSG, resId);
-        startActivity(intent);
+        context.startActivity(intent);
     }
 }
