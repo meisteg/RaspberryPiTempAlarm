@@ -16,17 +16,18 @@
 
 #include "Adafruit_DHT/Adafruit_DHT.h"
 
-#define DHT_PIN         D2
-#define DHT_TYPE        DHT22
+#define DHT_PIN            D2
+#define DHT_TYPE           DHT22
 
-#define BUTTON_PIN      D1
-#define BUTTON_PRESS_MS 50
+#define BUTTON_PIN         D1
+#define BUTTON_PRESS_MS    50
 
-#define LED_PIN         D7
+#define LED_PIN            D7
 
-unsigned long reportIntervalMillis = 2000;
+#define SENSOR_CHECK_MS    2000
+#define SENSOR_REPORT_MS   30000
+
 bool isReporting = true;
-
 volatile unsigned long buttonPressMillis = 0;
 volatile unsigned long buttonReleaseMillis = 0;
 
@@ -66,11 +67,11 @@ void checkStateChange() {
     }
 }
 
-void doReportIfTime() {
+void doMonitorIfTime() {
     static unsigned long lastReadingMillis = 0;
     unsigned long now = millis();
 
-    if ((now - lastReadingMillis) >= reportIntervalMillis) {
+    if ((now - lastReadingMillis) >= SENSOR_CHECK_MS) {
         float h = dht.getHumidity();
         float f = dht.getTempFarenheit();
 
@@ -92,6 +93,19 @@ void doReportIfTime() {
     }
 }
 
+void doReportIfTime() {
+    static unsigned long lastReportMillis = 0;
+    unsigned long now = millis();
+
+    if ((now - lastReportMillis) >= SENSOR_REPORT_MS) {
+        Serial.println("Reporting sensor data to server");
+        
+        // TODO: implement
+        
+        lastReportMillis = now;
+    }
+}
+
 void setup() {
     Serial.begin(9600);
 
@@ -107,6 +121,7 @@ void loop() {
     checkStateChange();
 
     if (isReporting) {
+        doMonitorIfTime();
         doReportIfTime();
     }
 }
