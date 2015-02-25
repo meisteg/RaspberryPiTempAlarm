@@ -27,6 +27,9 @@
 #define SENSOR_CHECK_MS    2000
 #define SENSOR_REPORT_MS   30000
 
+double currentTempF = 0.0;
+double currentHumid = 0.0;
+
 bool isReporting = true;
 volatile unsigned long buttonPressMillis = 0;
 volatile unsigned long buttonReleaseMillis = 0;
@@ -81,11 +84,14 @@ void doMonitorIfTime() {
             return;
         }
 
+        currentHumid = h;
+        currentTempF = f;
+
         Serial.print("Humid: "); 
-        Serial.print(h);
+        Serial.print(currentHumid);
         Serial.print("% - ");
         Serial.print("Temp: "); 
-        Serial.print(f);
+        Serial.print(currentTempF);
         Serial.print("*F ");
         Serial.println(Time.timeStr());
 
@@ -115,6 +121,9 @@ void setup() {
     attachInterrupt(BUTTON_PIN, buttonPress, FALLING);
 
     dht.begin();
+    
+    Spark.variable("currentTempF", &currentTempF, DOUBLE);
+    Spark.variable("currentHumid", &currentHumid, DOUBLE);
 }
 
 void loop() {
