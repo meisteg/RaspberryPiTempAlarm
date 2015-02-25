@@ -28,18 +28,22 @@ unsigned long reportIntervalMillis = 2000;
 bool isReporting = true;
 
 volatile unsigned long buttonPressMillis = 0;
+volatile unsigned long buttonReleaseMillis = 0;
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
 void buttonPress() {
     buttonPressMillis = millis();
+    buttonReleaseMillis = 0;
 }
 
 void checkStateChange() {
     if (buttonPressMillis > 0) {
         if (digitalRead(BUTTON_PIN) == HIGH) {
+            // False button press, ignore.
             buttonPressMillis = 0;
         } else if ((millis() - buttonPressMillis) >= BUTTON_PRESS_MS) {
+            // Button press debounced
             if (isReporting) {
                 digitalWrite(LED_PIN, HIGH);
                 Serial.println("Reporting stopped!");
@@ -49,6 +53,15 @@ void checkStateChange() {
             }
             isReporting = !isReporting;
             buttonPressMillis = 0;
+        }
+    } else if (!isReporting && (digitalRead(BUTTON_PIN) == HIGH)) {
+        if (buttonReleaseMillis > 0) {
+            if ((millis() - buttonReleaseMillis) >= BUTTON_PRESS_MS) {
+                Serial.println("Entering STOP mode");
+                Spark.sleep(BUTTON_PIN, FALLING);
+            }
+        } else {
+            buttonReleaseMillis = millis();
         }
     }
 }
