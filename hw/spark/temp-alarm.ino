@@ -100,15 +100,19 @@ void doMonitorIfTime() {
 }
 
 void doReportIfTime() {
+    static bool firstTime = true;
     static unsigned long lastReportMillis = 0;
     unsigned long now = millis();
+    char publishString[64];
 
-    if ((now - lastReportMillis) >= SENSOR_REPORT_MS) {
+    if (firstTime || ((now - lastReportMillis) >= SENSOR_REPORT_MS)) {
         Serial.println("Reporting sensor data to server");
         
-        // TODO: implement
+        snprintf(publishString, sizeof(publishString), "{\"tempF\": %.1f, \"humid\": %.1f}", currentTempF, currentHumid);
+        Spark.publish("sensorData", publishString);
         
         lastReportMillis = now;
+        firstTime = false;
     }
 }
 
