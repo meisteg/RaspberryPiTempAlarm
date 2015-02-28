@@ -28,7 +28,19 @@
 #define LED_PIN            D7
 
 #define SENSOR_CHECK_MS    2000
-#define SENSOR_REPORT_MS   30000
+
+#define EEPROM_PROGRAM_KEY 0xA5A5A5A5
+#define EEPROM_REPORT_MS   60000
+
+struct settingsEEPROM {
+    unsigned int programmedKey;
+    unsigned int sensorReportMillis;
+};
+
+union {
+    settingsEEPROM settings;
+    char raw[sizeof(settingsEEPROM)];
+} EEPROM_Data;
 
 double currentTempF = 0.0;
 double currentHumid = 0.0;
@@ -39,12 +51,30 @@ volatile unsigned long buttonReleaseMillis = 0;
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
-void buttonPress() {
+static void readEEPROM(void) {
+    unsigned int i;
+    for (i = 0; i < sizeof(settingsEEPROM); ++i) {
+        EEPROM_Data.raw[i] = EEPROM.read(i);
+    }
+    SERIAL.print(i);
+    SERIAL.println(" bytes read from EEPROM");
+}
+
+static void writeEEPROM(void) {
+    unsigned int i;
+    for (i = 0; i < sizeof(settingsEEPROM); ++i) {
+        EEPROM.write(i, EEPROM_Data.raw[i]);
+    }
+    SERIAL.print(i);
+    SERIAL.println(" bytes wrote to EEPROM");
+}
+
+static void buttonPress(void) {
     buttonPressMillis = millis();
     buttonReleaseMillis = 0;
 }
 
-void checkStateChange() {
+static void checkStateChange(void) {
     if (buttonPressMillis > 0) {
         if (digitalRead(BUTTON_PIN) == HIGH) {
             // False button press, ignore.
@@ -74,7 +104,7 @@ void checkStateChange() {
     }
 }
 
-void doMonitorIfTime() {
+static void doMonitorIfTime(void) {
     static unsigned long lastReadingMillis = 0;
     unsigned long now = millis();
 
@@ -103,13 +133,13 @@ void doMonitorIfTime() {
     }
 }
 
-void doReportIfTime() {
+static void doReportIfTime(void) {
     static bool firstTime = true;
     static unsigned long lastReportMillis = 0;
     unsigned long now = millis();
     char publishString[64];
 
-    if (firstTime || ((now - lastReportMillis) >= SENSOR_REPORT_MS)) {
+    if (firstTime || ((now - lastReportMillis) >= EEPROM_Data.settings.sensorReportMillis)) {
         SERIAL.println("Reporting sensor data to server");
         
         snprintf(publishString, sizeof(publishString), "{\"tempF\": %.1f, \"humid\": %.1f}", currentTempF, currentHumid);
@@ -120,12 +150,23 @@ void doReportIfTime() {
     }
 }
 
-void setup() {
+void setup(void) {
     SERIAL.begin(SERIAL_BAUD);
 
     SERIAL.println("Initializing DHT22 sensor");
     dht.begin();
     delay(2000);
+
+    readEEPROM();
+    if (EEPROM_PROGRAM_KEY == EEPROM_Data.settings.programmedKey) {
+        SERIAL.print("sensorReportMillis = ");
+        SERIAL.println(EEPROM_Data.settings.sensorReportMillis);
+    } else {
+        SERIAL.println("EEPROM not programmed! Setting default values.");
+        EEPROM_Data.settings.programmedKey = EEPROM_PROGRAM_KEY;
+        EEPROM_Data.settings.sensorReportMillis = EEPROM_REPORT_MS;
+        writeEEPROM();
+    }
 
     pinMode(LED_PIN, OUTPUT);
 
@@ -136,7 +177,7 @@ void setup() {
     Spark.variable("currentHumid", &currentHumid, DOUBLE);
 }
 
-void loop() {
+void loop(void) {
     checkStateChange();
 
     if (isReporting) {
