@@ -123,12 +123,14 @@ void doReportIfTime() {
 void setup() {
     SERIAL.begin(SERIAL_BAUD);
 
+    SERIAL.println("Initializing DHT22 sensor");
+    dht.begin();
+    delay(2000);
+
     pinMode(LED_PIN, OUTPUT);
 
     pinMode(BUTTON_PIN, INPUT_PULLUP);
     attachInterrupt(BUTTON_PIN, buttonPress, FALLING);
-
-    dht.begin();
     
     Spark.variable("currentTempF", &currentTempF, DOUBLE);
     Spark.variable("currentHumid", &currentHumid, DOUBLE);
