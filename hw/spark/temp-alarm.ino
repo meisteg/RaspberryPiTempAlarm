@@ -65,6 +65,7 @@ void checkStateChange() {
         if (buttonReleaseMillis > 0) {
             if ((millis() - buttonReleaseMillis) >= BUTTON_PRESS_MS) {
                 SERIAL.println("Entering STOP mode");
+                delay(20);
                 Spark.sleep(BUTTON_PIN, FALLING);
             }
         } else {
