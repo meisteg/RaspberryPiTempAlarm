@@ -84,6 +84,7 @@ static void checkStateChange(void) {
             if (isReporting) {
                 digitalWrite(LED_PIN, HIGH);
                 SERIAL.println("Reporting stopped!");
+                Spark.publish("sensorStopped");
             } else {
                 digitalWrite(LED_PIN, LOW);
                 SERIAL.println("Reporting started!");
