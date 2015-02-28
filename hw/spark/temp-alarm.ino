@@ -16,6 +16,9 @@
 
 #include "Adafruit_DHT/Adafruit_DHT.h"
 
+#define SERIAL             Serial1
+#define SERIAL_BAUD        115200
+
 #define DHT_PIN            D2
 #define DHT_TYPE           DHT22
 
@@ -50,10 +53,10 @@ void checkStateChange() {
             // Button press debounced
             if (isReporting) {
                 digitalWrite(LED_PIN, HIGH);
-                Serial.println("Reporting stopped!");
+                SERIAL.println("Reporting stopped!");
             } else {
                 digitalWrite(LED_PIN, LOW);
-                Serial.println("Reporting started!");
+                SERIAL.println("Reporting started!");
             }
             isReporting = !isReporting;
             buttonPressMillis = 0;
@@ -61,7 +64,7 @@ void checkStateChange() {
     } else if (!isReporting && (digitalRead(BUTTON_PIN) == HIGH)) {
         if (buttonReleaseMillis > 0) {
             if ((millis() - buttonReleaseMillis) >= BUTTON_PRESS_MS) {
-                Serial.println("Entering STOP mode");
+                SERIAL.println("Entering STOP mode");
                 Spark.sleep(BUTTON_PIN, FALLING);
             }
         } else {
@@ -80,20 +83,20 @@ void doMonitorIfTime() {
 
         // Check if any reads failed and exit early (to try again).
         if (isnan(h) || isnan(f)) {
-            Serial.println("Failed to read from DHT sensor!");
+            SERIAL.println("Failed to read from DHT sensor!");
             return;
         }
 
         currentHumid = h;
         currentTempF = f;
 
-        Serial.print("Humid: "); 
-        Serial.print(currentHumid);
-        Serial.print("% - ");
-        Serial.print("Temp: "); 
-        Serial.print(currentTempF);
-        Serial.print("*F ");
-        Serial.println(Time.timeStr());
+        SERIAL.print("Humid: "); 
+        SERIAL.print(currentHumid);
+        SERIAL.print("% - ");
+        SERIAL.print("Temp: "); 
+        SERIAL.print(currentTempF);
+        SERIAL.print("*F ");
+        SERIAL.println(Time.timeStr());
 
         lastReadingMillis = now;
     }
@@ -106,7 +109,7 @@ void doReportIfTime() {
     char publishString[64];
 
     if (firstTime || ((now - lastReportMillis) >= SENSOR_REPORT_MS)) {
-        Serial.println("Reporting sensor data to server");
+        SERIAL.println("Reporting sensor data to server");
         
         snprintf(publishString, sizeof(publishString), "{\"tempF\": %.1f, \"humid\": %.1f}", currentTempF, currentHumid);
         Spark.publish("sensorData", publishString);
@@ -117,7 +120,7 @@ void doReportIfTime() {
 }
 
 void setup() {
-    Serial.begin(9600);
+    SERIAL.begin(SERIAL_BAUD);
 
     pinMode(LED_PIN, OUTPUT);
 
