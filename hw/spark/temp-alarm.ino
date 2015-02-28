@@ -69,6 +69,25 @@ static void writeEEPROM(void) {
     SERIAL.println(" bytes wrote to EEPROM");
 }
 
+static int setReportRate(String rate) {
+    unsigned int sensorReportMillis = atoi(rate.c_str());
+
+    if (sensorReportMillis >= EEPROM_REPORT_MS) {
+        SERIAL.print("Changing sensorReportMillis from ");
+        SERIAL.print(EEPROM_Data.settings.sensorReportMillis);
+        SERIAL.print(" to ");
+        SERIAL.println(sensorReportMillis);
+    
+        EEPROM_Data.settings.sensorReportMillis = sensorReportMillis;
+        writeEEPROM();
+
+        return 0;
+    }
+    
+    SERIAL.println("New sensorReportMillis value is too small. Rejecting.");
+    return -1;
+}
+
 static void buttonPress(void) {
     buttonPressMillis = millis();
     buttonReleaseMillis = 0;
@@ -176,6 +195,8 @@ void setup(void) {
     
     Spark.variable("currentTempF", &currentTempF, DOUBLE);
     Spark.variable("currentHumid", &currentHumid, DOUBLE);
+    
+    Spark.function("reportRate", setReportRate);
 }
 
 void loop(void) {
