@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ public class TemperatureRecord {
     @Index
     private long timestamp;
 
-    @Index
     private float degF;
+    private int light;
 
     @Index
-    private int light;
+    private String device;
 
     public TemperatureRecord() {
         timestamp = System.currentTimeMillis();
@@ -79,5 +79,9 @@ public class TemperatureRecord {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public void setDevice(final String device) {
+        this.device = device;
     }
 }
