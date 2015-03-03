@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ public class AlertEmail {
     private static final String SUBJECT_STOPPED = "FYI: Temperature monitoring has been stopped";
 
     private static final String BODY_TEMP_TEMPLATE = "Temperature is %s degrees.";
-    private static final String BODY_PWR_OUT = "No longer receiving data from RasPi.";
-    private static final String BODY_STOPPED = "If this is unexpected, please check the RasPi.";
+    private static final String BODY_PWR_OUT = "No longer receiving data from sensor.";
+    private static final String BODY_STOPPED = "If this is unexpected, please check the sensor.";
 
     private static final String FOOTER = "\n\nhttp://rasptempalarm.appspot.com";
 
@@ -83,8 +83,13 @@ public class AlertEmail {
 
     private static boolean sendTo(final String subject, final String body,
                                   final InternetAddress... recipients) {
-        if ((subject == null) || (body == null)) {
-            log.warning("Subject or Body is null");
+        if ((subject == null) || (body == null) || (recipients == null)) {
+            log.warning("Parameters to sendTo cannot be null.");
+            return false;
+        }
+
+        if (recipients.length == 0) {
+            log.warning("No recipients specified.");
             return false;
         }
 
@@ -120,6 +125,19 @@ public class AlertEmail {
                 log.severe("Failed to add " + record.getUserEmail() + " as recipient");
             }
         }
+
+        final String extraEmails = SettingUtils.getSettingValue(Constants.SETTING_EXTRA_EMAILS,
+                Constants.DEFAULT_EXTRA_EMAILS);
+        if (extraEmails != null) {
+            for (final String extraEmail : extraEmails.split(",")) {
+                try {
+                    recipients.add(new InternetAddress(extraEmail));
+                } catch (final AddressException e) {
+                    log.severe("Failed to add " + extraEmail + " as recipient");
+                }
+            }
+        }
+
         return recipients.toArray(new InternetAddress[recipients.size()]);
     }
 }
