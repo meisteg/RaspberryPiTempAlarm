@@ -31,6 +31,10 @@
         <servlet-name>TempCleanupServlet</servlet-name>
         <servlet-class>com.meiste.tempalarm.backend.TempCleanupServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TemperatureServlet</servlet-name>
+        <servlet-class>com.meiste.tempalarm.backend.TemperatureServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>SystemServiceServlet</servlet-name>
@@ -47,6 +51,10 @@
     <servlet-mapping>
         <servlet-name>TempCleanupServlet</servlet-name>
         <url-pattern>/tasks/cleanup_temp</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TemperatureServlet</servlet-name>
+        <url-pattern>/temp</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>
