@@ -32,6 +32,7 @@ public class TemperatureRecord {
 
     private float degF;
     private int light;
+    private float humidity;
 
     @Index
     private String device;
@@ -83,5 +84,17 @@ public class TemperatureRecord {
 
     public void setDevice(final String device) {
         this.device = device;
+    }
+
+    public String getHumidity() {
+        return String.format("%.1f", humidity);
+    }
+
+    public float getFloatHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(final float humidity) {
+        this.humidity = humidity;
     }
 }

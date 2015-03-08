@@ -36,7 +36,7 @@ public class TemperatureServlet extends HttpServlet {
         final String event = req.getParameter("event");
         final String coreid = req.getParameter("coreid");
 
-        log.info("Received " + event + " from device " + coreid);
+        log.fine("Received " + event + " from device " + coreid);
         switch (event) {
             case EVENT_SENSOR_REPORT:
                 final String data = req.getParameter("data");
@@ -53,8 +53,8 @@ public class TemperatureServlet extends HttpServlet {
     }
 
     private static class SensorReport {
-        public double tempF;
-        public double humid;
+        public float tempF;
+        public float humid;
 
         public SensorReport() {
             // Needed for Gson

@@ -20,24 +20,29 @@
                     ofy().load().type(TemperatureRecord.class).order("-timestamp").first().now();
                 if (temp != null) {
 %>
-                <h1><%= temp.getDegF() %> degrees</h1>
+                    <h1><%= temp.getDegF() %> degrees</h1>
 <%
-                if (temp.areLightsOn()) {
+                    // Currently, if the temp record has humidity, it will not have light info
+                    if (temp.getFloatHumidity() > 0) {
 %>
-                <p>Lights are ON</p>
+                        <p><%= temp.getHumidity() %>% humidity</p>
+<%
+                    } else if (temp.areLightsOn()) {
+%>
+                        <p>Lights are ON</p>
+<%
+                    } else {
+%>
+                        <p>Lights are OFF</p>
+<%
+                    }
+%>
+                    <p><%= temp.getRelativeTimeSpanString() %></p>
 <%
                 } else {
 %>
-                <p>Lights are OFF</p>
-<%
-                }
-%>
-                <p><%= temp.getRelativeTimeSpanString() %></p>
-<%
-                } else {
-%>
-                <h1>N/A degrees</h1>
-                <p>No data available</p>
+                    <h1>N/A degrees</h1>
+                    <p>No data available</p>
 <%
                 }
 %>
