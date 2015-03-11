@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ public class AppConstants {
     public static final String PREF_NOTIFICATIONS = "notifications_enabled";
     public static final String PREF_REPORT_RATE = "report_rate";
     public static final String PREF_SYNC_FREQ = "sync_frequency";
-    public static final String PREF_THRES_LIGHT = "thres.light";
 
     public static final String INTENT_ACTION_KILL_ALARM = "com.meiste.tempalarm.killalarm";
     public static final String INTENT_EXTRA_ALERT_MSG = "msg_resid";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,8 @@ import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.content.SyncStatusObserver;
 import android.database.Cursor;
-import android.preference.PreferenceManager;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -79,12 +77,12 @@ public class CurrentTemp extends ActionBarActivity
             RasPiContract.RasPiReport._ID,
             RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP,
             RasPiContract.RasPiReport.COLUMN_NAME_DEGF,
-            RasPiContract.RasPiReport.COLUMN_NAME_LIGHT,
+            RasPiContract.RasPiReport.COLUMN_NAME_HUMIDITY,
     };
 
     private static final int COLUMN_TIMESTAMP = 1;
     private static final int COLUMN_DEGF = 2;
-    private static final int COLUMN_LIGHT = 3;
+    private static final int COLUMN_HUMIDITY = 3;
 
     /**
      * List of Cursor columns to read from when preparing an adapter to populate the ListView.
@@ -92,7 +90,7 @@ public class CurrentTemp extends ActionBarActivity
     private static final String[] FROM_COLUMNS = new String[]{
             RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP,
             RasPiContract.RasPiReport.COLUMN_NAME_DEGF,
-            RasPiContract.RasPiReport.COLUMN_NAME_LIGHT,
+            RasPiContract.RasPiReport.COLUMN_NAME_HUMIDITY,
     };
 
     /**
@@ -101,7 +99,7 @@ public class CurrentTemp extends ActionBarActivity
     private static final int[] TO_FIELDS = new int[]{
             R.id.timestamp,
             R.id.degF,
-            R.id.lights,
+            R.id.humidity,
     };
 
     private Dialog mDialog;
@@ -109,7 +107,6 @@ public class CurrentTemp extends ActionBarActivity
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
     private SimpleCursorAdapter mAdapter;
-    private int mLightThreshold;
     private LineGraphView mGraph;
 
     @InjectView(R.id.temp_list)
@@ -136,12 +133,9 @@ public class CurrentTemp extends ActionBarActivity
                         // Restrict to one decimal place
                         textView.setText(String.format("%.1f", cursor.getFloat(columnIndex)));
                         return true;
-                    case COLUMN_LIGHT:
-                        if (cursor.getInt(columnIndex) < mLightThreshold) {
-                            textView.setText(getText(R.string.lights_on));
-                        } else {
-                            textView.setText(getText(R.string.lights_off));
-                        }
+                    case COLUMN_HUMIDITY:
+                        // Restrict to one decimal place
+                        textView.setText(String.format("%.1f %%", cursor.getFloat(columnIndex)));
                         return true;
                 }
                 return false;
@@ -380,9 +374,6 @@ public class CurrentTemp extends ActionBarActivity
      */
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor cursor) {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mLightThreshold = prefs.getInt(AppConstants.PREF_THRES_LIGHT, 0);
-
         mGraph.removeAllSeries();
         final List<GraphView.GraphViewData> data = new ArrayList<>();
         cursor.moveToLast();

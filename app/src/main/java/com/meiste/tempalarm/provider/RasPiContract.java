@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class RasPiContract {
         public static final String TABLE_NAME = "reports";
 
         public static final String COLUMN_NAME_DEGF = "degF";
-        public static final String COLUMN_NAME_LIGHT = "light";
+        public static final String COLUMN_NAME_HUMIDITY = "humidity";
         public static final String COLUMN_NAME_TIMESTAMP = "timestamp";
 
         public static final String SORT_OLDEST_FIRST = COLUMN_NAME_TIMESTAMP + " ASC";

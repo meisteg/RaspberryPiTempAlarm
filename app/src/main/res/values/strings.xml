@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 Gregory S. Meiste <http://gregmeiste.com>
+     Copyright (C) 2014-2015 Gregory S. Meiste <http://gregmeiste.com>
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -26,10 +26,7 @@
 
     <string name="header_timestamp">Time</string>
     <string name="header_degrees">Degrees</string>
-    <string name="header_light">Lights</string>
-
-    <string name="lights_on">ON</string>
-    <string name="lights_off">OFF</string>
+    <string name="header_humidity">Humidity</string>
 
     <string name="alarm_low_temp">Low temperature detected!</string>
     <string name="alarm_pwr_out">Possible power outage!</string>

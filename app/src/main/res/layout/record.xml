@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 Gregory S. Meiste <http://gregmeiste.com>
+     Copyright (C) 2014-2015 Gregory S. Meiste <http://gregmeiste.com>
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
         android:id="@+id/timestamp"
         android:layout_width="0px"
         android:layout_height="wrap_content"
-        android:layout_weight="0.60"
+        android:layout_weight="0.58"
         android:layout_marginLeft="10dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp" />
@@ -34,16 +34,16 @@
         android:id="@+id/degF"
         android:layout_width="0px"
         android:layout_height="wrap_content"
-        android:layout_weight="0.20"
+        android:layout_weight="0.21"
         android:layout_marginLeft="10dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp" />
 
     <TextView
-        android:id="@+id/lights"
+        android:id="@+id/humidity"
         android:layout_width="0px"
         android:layout_height="wrap_content"
-        android:layout_weight="0.20"
+        android:layout_weight="0.21"
         android:layout_marginLeft="10dp"
         android:paddingTop="10dp"
         android:paddingBottom="10dp" />

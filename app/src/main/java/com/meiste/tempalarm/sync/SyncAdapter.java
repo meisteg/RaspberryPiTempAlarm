@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Timber.v("Scheduling insert of record %s", record.getTimestamp());
                 batch.add(ContentProviderOperation.newInsert(RasPiContract.RasPiReport.CONTENT_URI)
                         .withValue(RasPiContract.RasPiReport.COLUMN_NAME_DEGF, record.getFloatDegF())
-                        .withValue(RasPiContract.RasPiReport.COLUMN_NAME_LIGHT, record.getLight())
+                        .withValue(RasPiContract.RasPiReport.COLUMN_NAME_HUMIDITY, record.getFloatHumidity())
                         .withValue(RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP, record.getTimestamp())
                         .build());
                 syncResult.stats.numInserts++;
@@ -180,17 +180,12 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
             // Do some more things if this is not a quick update
             if (!expedited) {
-                // Get light threshold from backend
-                final SettingRecord lightSetting = mTempService.getLightThreshold().execute();
-                final int lightThres = Integer.valueOf(lightSetting.getValue());
-                editor.putInt(AppConstants.PREF_THRES_LIGHT, lightThres);
-
                 // Get report rate (in seconds) from backend
                 final SettingRecord rateSetting = mTempService.getReportRate().execute();
                 final int reportRate = Integer.valueOf(rateSetting.getValue());
                 editor.putLong(AppConstants.PREF_REPORT_RATE, reportRate * DateUtils.SECOND_IN_MILLIS);
 
-                Timber.d("lightThres = %s, reportRate = %s seconds", lightThres, reportRate);
+                Timber.d("reportRate = %s seconds", reportRate);
             }
 
             editor.putLong(AppConstants.PREF_LAST_SYNC, System.currentTimeMillis());

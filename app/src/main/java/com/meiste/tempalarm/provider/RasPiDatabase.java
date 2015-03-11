@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.meiste.tempalarm.sync.SyncAdapter;
+
 import timber.log.Timber;
 
 /**
@@ -30,7 +32,7 @@ import timber.log.Timber;
  */
 public class RasPiDatabase extends SQLiteOpenHelper {
     /** Schema version. */
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
 
     /** Filename for SQLite file. */
     public static final String DATABASE_NAME = "raspi.db";
@@ -40,15 +42,18 @@ public class RasPiDatabase extends SQLiteOpenHelper {
             "CREATE TABLE " + RasPiContract.RasPiReport.TABLE_NAME + " (" +
                     RasPiContract.RasPiReport._ID + " INTEGER PRIMARY KEY," +
                     RasPiContract.RasPiReport.COLUMN_NAME_DEGF + " REAL," +
-                    RasPiContract.RasPiReport.COLUMN_NAME_LIGHT + " INTEGER," +
+                    RasPiContract.RasPiReport.COLUMN_NAME_HUMIDITY + " REAL," +
                     RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP + " INTEGER)";
 
     /** SQL statement to drop reports table. */
     private static final String SQL_DELETE_REPORTS =
             "DROP TABLE IF EXISTS " + RasPiContract.RasPiReport.TABLE_NAME;
 
+    private final Context mContext;
+
     public RasPiDatabase(final Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        mContext = context;
     }
 
     @Override
@@ -64,5 +69,8 @@ public class RasPiDatabase extends SQLiteOpenHelper {
         // Upgrade policy is to simply to discard the data and start over
         db.execSQL(SQL_DELETE_REPORTS);
         onCreate(db);
+
+        // Request sync to repopulate the database
+        SyncAdapter.requestSync(mContext, true);
     }
 }
