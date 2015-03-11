@@ -70,7 +70,7 @@ dependencies {
     compile 'com.jjoe64:graphview:3.1.4'
     compile 'com.meiste.greg:gcm:1.0'
     compile project(path: ':backend', configuration: 'android-endpoints')
-    compile('com.crashlytics.sdk.android:crashlytics:2.2.0@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.2@aar') {
         transitive = true;
     }
 }
