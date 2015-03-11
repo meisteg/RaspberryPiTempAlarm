@@ -17,7 +17,7 @@
 
 <resources>
 
-    <string name="app_name">RasPi Temp Alarm</string>
+    <string name="app_name">Shop Temp Alarm</string>
 
     <string name="action_refresh">Refresh</string>
     <string name="action_settings">Settings</string>
