@@ -66,7 +66,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.android.gms:play-services-base:6.5.87'
     compile 'com.jakewharton.timber:timber:2.5.0'
-    compile 'com.jakewharton:butterknife:6.0.0'
+    compile 'com.jakewharton:butterknife:6.1.0'
     compile 'com.jjoe64:graphview:3.1.4'
     compile 'com.meiste.greg:gcm:1.0'
     compile project(path: ':backend', configuration: 'android-endpoints')
