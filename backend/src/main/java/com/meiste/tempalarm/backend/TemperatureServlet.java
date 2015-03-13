@@ -36,16 +36,20 @@ public class TemperatureServlet extends HttpServlet {
         final String event = req.getParameter("event");
         final String coreid = req.getParameter("coreid");
 
+        if ((event == null) || (coreid == null)) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
         log.fine("Received " + event + " from device " + coreid);
         switch (event) {
             case EVENT_SENSOR_REPORT:
                 final String data = req.getParameter("data");
                 final SensorReport report = new Gson().fromJson(data, SensorReport.class);
-                log.info("Sensor reported " + report.tempF + "*F, " + report.humid + "%");
-                // TODO: implement me
+                TemperatureCommon.report(coreid, report.tempF, report.humid, 0);
                 break;
             case EVENT_SENSOR_STOPPED:
-                // TODO: implement me
+                TemperatureCommon.stop();
                 break;
         }
 
