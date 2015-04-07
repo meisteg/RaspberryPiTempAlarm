@@ -15,7 +15,6 @@
  */
 package com.meiste.tempalarm.backend;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -23,7 +22,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.AddressException;
@@ -97,12 +95,12 @@ public class AlertEmail {
         final Session session = Session.getDefaultInstance(props, null);
         final Message msg = new MimeMessage(session);
         try {
-            msg.setFrom(new InternetAddress("greg.meiste@gmail.com", "RasPi Temp Alarm"));
+            msg.setFrom(new InternetAddress("greg.meiste@gmail.com", "Shop Temp Alarm"));
             msg.addRecipients(Message.RecipientType.BCC, recipients);
             msg.setSubject(subject);
             msg.setText(body + FOOTER);
             Transport.send(msg);
-        } catch (final MessagingException | UnsupportedEncodingException e) {
+        } catch (final Exception e) {
             log.severe("Failed to send message: " + e);
             return false;
         }
