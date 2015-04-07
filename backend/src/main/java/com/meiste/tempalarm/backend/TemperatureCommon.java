@@ -38,6 +38,13 @@ public class TemperatureCommon {
         log.fine("prevTemp=" + prevTemp + ", newTemp=" + temperature +
                  ", humidity=" + humidity + ", light=" + light);
 
+        // Check to make sure not being spammed with reports
+        if ((prevRecord != null) &&
+            ((System.currentTimeMillis() - prevRecord.getTimestamp()) < Constants.MINUTE_IN_MILLIS)) {
+            log.warning("Received new report too soon. Ignoring.");
+            return;
+        }
+
         final TemperatureRecord record = new TemperatureRecord();
         record.setDegF(temperature);
         record.setLight(light);
