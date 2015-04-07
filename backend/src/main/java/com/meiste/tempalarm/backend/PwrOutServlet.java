@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.meiste.tempalarm.backend;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,13 +24,25 @@ import javax.servlet.http.HttpServletResponse;
 
 public class PwrOutServlet extends HttpServlet {
 
+    private static final Logger log = Logger.getLogger(PwrOutServlet.class.getSimpleName());
+
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
             throws IOException {
-        SettingUtils.setValue(Constants.SETTING_TASK_NAME, Constants.DEFAULT_TASK_NAME);
+        final String thisTaskName = req.getHeader("X-AppEngine-TaskName");
+        final String expectedTaskName = SettingUtils.getSettingValue(
+                Constants.SETTING_TASK_NAME, Constants.DEFAULT_TASK_NAME);
 
-        Gcm.sendSensor(Gcm.SensorState.PWR_OUT);
-        AlertEmail.sendPwrOut();
+        log.info("thisTaskName=" + thisTaskName + ", expected=" + expectedTaskName);
+
+        if (thisTaskName == null || thisTaskName.equals(expectedTaskName)) {
+            SettingUtils.setValue(Constants.SETTING_TASK_NAME, Constants.DEFAULT_TASK_NAME);
+
+            Gcm.sendSensor(Gcm.SensorState.PWR_OUT);
+            AlertEmail.sendPwrOut();
+        } else {
+            log.warning("Ignoring request since not expected task name.");
+        }
 
         resp.setStatus(HttpServletResponse.SC_OK);
     }
