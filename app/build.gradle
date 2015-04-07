@@ -42,8 +42,8 @@ android {
     }
 
     lintOptions {
-        warningsAsErrors true
         textReport true
+        xmlReport false
     }
 
     signingConfigs {
