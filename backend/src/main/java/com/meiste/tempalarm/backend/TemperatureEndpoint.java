@@ -47,8 +47,18 @@ public class TemperatureEndpoint {
             path = "getReportRate"
     )
     public SettingRecord getReportRate() {
-        return SettingUtils.getSettingRecord(Constants.SETTING_REPORT_RATE,
-                Constants.DEFAULT_REPORT_RATE);
+        /*
+         * The sensor does not get the report rate from the server any longer,
+         * so the server does not know what rate the sensor will use. The app
+         * still calls this API, so return a sane value to it.
+         *
+         * A hard coded value is returned instead of one read from the datastore
+         * to reduce datastore quota usage.
+         */
+        final SettingRecord setting = new SettingRecord();
+        setting.setName(Constants.SETTING_REPORT_RATE);
+        setting.setValue(Constants.DEFAULT_REPORT_RATE);
+        return setting;
     }
 
     /**
