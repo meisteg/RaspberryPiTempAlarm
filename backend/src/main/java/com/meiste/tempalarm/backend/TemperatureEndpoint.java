@@ -20,7 +20,6 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.response.CollectionResponse;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Named;
@@ -53,26 +52,6 @@ public class TemperatureEndpoint {
     }
 
     /**
-     * Report the current temperature to the backend
-     *
-     * @param temperature The current temperature in degrees fahrenheit
-     * @param light       The current light level measured by RC circuit
-     */
-    @ApiMethod(name = "report")
-    public void report(@Named("temperature") final float temperature,
-                       @Named("light") final int light) throws IOException {
-        TemperatureCommon.report("raspi", temperature, 0, light);
-    }
-
-    /**
-     * Notifies the backend that temperature reporting has stopped.
-     */
-    @ApiMethod(name = "stop")
-    public void stop() throws IOException {
-        /* Do nothing */
-    }
-
-    /**
      * Return a collection of temperature data
      *
      * @param count The number of temperature records to return (or 0 for max)
@@ -87,20 +66,6 @@ public class TemperatureEndpoint {
         final List<TemperatureRecord> records = ofy().load().type(TemperatureRecord.class)
                 .order("-timestamp").limit(limit).list();
         return CollectionResponse.<TemperatureRecord>builder().setItems(records).build();
-    }
-
-    /**
-     * Query the light threshold setting
-     *
-     * @return The threshold value for lights on/off
-     */
-    @ApiMethod(
-            name = "getLightThreshold",
-            path = "getLightThreshold"
-    )
-    public SettingRecord getLightThreshold() {
-        return SettingUtils.getSettingRecord(Constants.SETTING_THRES_LIGHT,
-                Constants.DEFAULT_THRES_LIGHT);
     }
 
     private static int getRecordLimit() {

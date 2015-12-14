@@ -24,15 +24,15 @@ import static com.meiste.tempalarm.backend.OfyService.ofy;
 public class TemperatureCommon {
     private static final Logger log = Logger.getLogger(TemperatureCommon.class.getName());
 
-    public static void report(final String device, final float temperature,
-                              final float humidity, final int light) throws IOException {
+    public static void report(final float temperature, final float humidity)
+            throws IOException {
         // Retrieve last reported temperature from datastore
         final TemperatureRecord prevRecord = ofy().load().type(TemperatureRecord.class)
                 .order("-timestamp").limit(1).first().now();
         final float prevTemp = (prevRecord != null) ? prevRecord.getFloatDegF() : Float.NaN;
 
         log.fine("prevTemp=" + prevTemp + ", newTemp=" + temperature +
-                 ", humidity=" + humidity + ", light=" + light);
+                 ", humidity=" + humidity);
 
         // Check to make sure not being spammed with reports
         if ((prevRecord != null) &&
@@ -43,9 +43,7 @@ public class TemperatureCommon {
 
         final TemperatureRecord record = new TemperatureRecord();
         record.setDegF(temperature);
-        record.setLight(light);
         record.setHumidity(humidity);
-        record.setDevice(device);
         ofy().save().entity(record);
 
         final float lowTempThreshold = getLowTempThreshold();

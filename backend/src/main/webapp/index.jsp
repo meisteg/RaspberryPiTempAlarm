@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Raspberry Pi Temperature Alarm</title>
+    <title>Shop Temperature Alarm</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <meta http-equiv="refresh" content="60">
 </head>
@@ -21,22 +21,7 @@
                 if (temp != null) {
 %>
                     <h1><%= temp.getDegF() %> degrees</h1>
-<%
-                    // Currently, if the temp record has humidity, it will not have light info
-                    if (temp.getFloatHumidity() > 0) {
-%>
-                        <p><%= temp.getHumidity() %>% humidity</p>
-<%
-                    } else if (temp.areLightsOn()) {
-%>
-                        <p>Lights are ON</p>
-<%
-                    } else {
-%>
-                        <p>Lights are OFF</p>
-<%
-                    }
-%>
+                    <p><%= temp.getHumidity() %>% humidity</p>
                     <p><%= temp.getRelativeTimeSpanString() %></p>
 <%
                 } else {

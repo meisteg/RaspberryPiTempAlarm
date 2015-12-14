@@ -31,11 +31,7 @@ public class TemperatureRecord {
     private long timestamp;
 
     private float degF;
-    private int light;
     private float humidity;
-
-    @Index
-    private String device;
 
     public TemperatureRecord() {
         timestamp = System.currentTimeMillis();
@@ -53,20 +49,6 @@ public class TemperatureRecord {
         this.degF = degF;
     }
 
-    public boolean areLightsOn() {
-        final int thres = Integer.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LIGHT,
-                Constants.DEFAULT_THRES_LIGHT));
-        return light < thres;
-    }
-
-    public int getLight() {
-        return light;
-    }
-
-    public void setLight(final int light) {
-        this.light = light;
-    }
-
     public String getRelativeTimeSpanString() {
         final long delta = System.currentTimeMillis() - timestamp;
 
@@ -80,10 +62,6 @@ public class TemperatureRecord {
 
     public long getTimestamp() {
         return timestamp;
-    }
-
-    public void setDevice(final String device) {
-        this.device = device;
     }
 
     public String getHumidity() {

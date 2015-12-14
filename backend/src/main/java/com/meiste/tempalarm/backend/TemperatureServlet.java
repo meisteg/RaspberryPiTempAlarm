@@ -28,28 +28,23 @@ public class TemperatureServlet extends HttpServlet {
 
     private static final Logger log = Logger.getLogger(TemperatureServlet.class.getName());
     private static final String EVENT_SENSOR_REPORT = "sensorData";
-    private static final String EVENT_SENSOR_STOPPED = "sensorStopped";
 
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
             throws IOException {
         final String event = req.getParameter("event");
-        final String coreid = req.getParameter("coreid");
 
-        if ((event == null) || (coreid == null)) {
+        if (event == null) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        log.fine("Received " + event + " from device " + coreid);
+        log.fine("Received " + event);
         switch (event) {
             case EVENT_SENSOR_REPORT:
                 final String data = req.getParameter("data");
                 final SensorReport report = new Gson().fromJson(data, SensorReport.class);
-                TemperatureCommon.report(coreid, report.tempF, report.humid, 0);
-                break;
-            case EVENT_SENSOR_STOPPED:
-                /* Do nothing */
+                TemperatureCommon.report(report.tempF, report.humid);
                 break;
         }
 
