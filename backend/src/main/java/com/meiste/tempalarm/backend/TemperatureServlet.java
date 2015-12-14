@@ -49,7 +49,7 @@ public class TemperatureServlet extends HttpServlet {
                 TemperatureCommon.report(coreid, report.tempF, report.humid, 0);
                 break;
             case EVENT_SENSOR_STOPPED:
-                TemperatureCommon.stop();
+                /* Do nothing */
                 break;
         }
 

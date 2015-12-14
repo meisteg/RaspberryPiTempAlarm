@@ -40,11 +40,7 @@ public class Constants {
     public static final String DEFAULT_RECORD_EXPIRE = Integer.toString(10); /* days */
     public static final String DEFAULT_RECORD_LIMIT = Integer.toString(300);
     public static final String DEFAULT_REPORT_RATE = Integer.toString(300);  /* seconds */
-    public static final String DEFAULT_TASK_NAME = "none";
 
-    public static final int REPORTS_MISSED_BEFORE_ALARM = 2;
-
-    public static final long SECOND_IN_MILLIS = 1000;
     public static final long MINUTE_IN_MILLIS = 60000;
     public static final long HOUR_IN_MILLIS = 3600000;
     public static final long DAY_IN_MILLIS = 86400000;

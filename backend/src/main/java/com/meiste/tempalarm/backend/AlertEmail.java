@@ -36,13 +36,8 @@ public class AlertEmail {
 
     private static final String SUBJECT_LOW_TEMP = "URGENT: Low temperature detected!";
     private static final String SUBJECT_NORM_TEMP = "FYI: Temperature has returned to allowed range";
-    private static final String SUBJECT_PWR_OUT = "URGENT: Possible power outage!";
-    private static final String SUBJECT_RUNNING = "FYI: Temperature monitoring is running";
-    private static final String SUBJECT_STOPPED = "FYI: Temperature monitoring has been stopped";
 
     private static final String BODY_TEMP_TEMPLATE = "Temperature is %s degrees.";
-    private static final String BODY_PWR_OUT = "No longer receiving data from sensor.";
-    private static final String BODY_STOPPED = "If this is unexpected, please check the sensor.";
 
     private static final String FOOTER = "\n\nhttp://rasptempalarm.appspot.com";
 
@@ -52,18 +47,6 @@ public class AlertEmail {
 
     public static boolean sendNormTemp(final String temp) {
         return sendToAll(SUBJECT_NORM_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
-    }
-
-    public static boolean sendPwrOut() {
-        return sendToAll(SUBJECT_PWR_OUT, BODY_PWR_OUT);
-    }
-
-    public static boolean sendRunning(final String temp) {
-        return sendToAll(SUBJECT_RUNNING, String.format(BODY_TEMP_TEMPLATE, temp));
-    }
-
-    public static boolean sendStopped() {
-        return sendToAll(SUBJECT_STOPPED, BODY_STOPPED);
     }
 
     public static boolean sendToAll(final String subject, final String body) {

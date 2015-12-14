@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,16 +40,5 @@ public class SettingUtils {
 
     public static String getSettingValue(final String name, final String defValue) {
         return getSettingRecord(name, defValue).getValue();
-    }
-
-    public static void setValue(final String name, final String newValue) {
-        SettingRecord setting = ofy().load().type(SettingRecord.class)
-                .filter("name", name).first().now();
-        if (setting == null) {
-            setting = new SettingRecord();
-            setting.setName(name);
-        }
-        setting.setValue(newValue);
-        ofy().save().entity(setting).now();
     }
 }

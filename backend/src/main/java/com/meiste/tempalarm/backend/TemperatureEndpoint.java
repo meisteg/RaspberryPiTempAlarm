@@ -69,7 +69,7 @@ public class TemperatureEndpoint {
      */
     @ApiMethod(name = "stop")
     public void stop() throws IOException {
-        TemperatureCommon.stop();
+        /* Do nothing */
     }
 
     /**
