@@ -27,7 +27,6 @@ public class Constants {
     public static final String SETTING_GCM_EXPIRE = "gcm.expire";
     public static final String SETTING_THRES_LOW = "thres.low";
     public static final String SETTING_RECORD_EXPIRE = "record.expire";
-    public static final String SETTING_RECORD_LIMIT = "record.limit";
     public static final String SETTING_REPORT_RATE = "report.rate";
 
     public static final String DEFAULT_EXTRA_EMAILS = null;
@@ -35,7 +34,6 @@ public class Constants {
     public static final String DEFAULT_GCM_EXPIRE = Integer.toString(60);    /* days */
     public static final String DEFAULT_THRES_LOW = Float.toString(45.0f);    /* degrees */
     public static final String DEFAULT_RECORD_EXPIRE = Integer.toString(10); /* days */
-    public static final String DEFAULT_RECORD_LIMIT = Integer.toString(300);
     public static final String DEFAULT_REPORT_RATE = Integer.toString(60);   /* seconds */
 
     public static final long MINUTE_IN_MILLIS = 60000;

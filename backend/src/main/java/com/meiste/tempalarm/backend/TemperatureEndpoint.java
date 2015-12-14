@@ -37,6 +37,8 @@ import static com.meiste.tempalarm.backend.OfyService.ofy;
 )
 public class TemperatureEndpoint {
 
+    private static final int RECORD_LIMIT = 120;
+
     /**
      * Query the desired reporting rate
      *
@@ -69,17 +71,12 @@ public class TemperatureEndpoint {
      */
     @ApiMethod(name = "get")
     public CollectionResponse<TemperatureRecord> listRecords(@Named("count") final int count) {
-        int limit = getRecordLimit();
+        int limit = RECORD_LIMIT;
         if ((count > 0) && (count < limit)) {
             limit = count;
         }
         final List<TemperatureRecord> records = ofy().load().type(TemperatureRecord.class)
                 .order("-timestamp").limit(limit).list();
         return CollectionResponse.<TemperatureRecord>builder().setItems(records).build();
-    }
-
-    private static int getRecordLimit() {
-        return Integer.valueOf(SettingUtils.getSettingValue(Constants.SETTING_RECORD_LIMIT,
-                Constants.DEFAULT_RECORD_LIMIT));
     }
 }
