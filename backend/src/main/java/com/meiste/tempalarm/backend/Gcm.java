@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,21 +30,13 @@ public class Gcm {
     private static final Logger log = Logger.getLogger(Gcm.class.getSimpleName());
 
     private static final String COLLAPSE_KEY_ALARM = "alarm";
-    private static final String COLLAPSE_KEY_SENSOR = "sensor";
     private static final String STATE_KEY = "state";
 
-    public static enum AlarmState {
+    public enum AlarmState {
         TEMP_TOO_LOW, TEMP_NORMAL
     }
     public static void sendAlarm(final AlarmState state) throws IOException {
         send(COLLAPSE_KEY_ALARM, state.name());
-    }
-
-    public static enum SensorState {
-        STOPPED, RUNNING, PWR_OUT
-    }
-    public static void sendSensor(final SensorState state) throws IOException {
-        send(COLLAPSE_KEY_SENSOR, state.name());
     }
 
     private static void send(final String key, final String state) throws IOException {
