@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class TempCleanupServlet extends HttpServlet {
                 ofy().load().type(TemperatureRecord.class).filter("timestamp <", exp_timestamp).keys().list();
         ofy().delete().keys(keys);
 
-        final String total_msg = "Cleaned up " + keys.size() + " registrations";
+        final String total_msg = "Cleaned up " + keys.size() + " records";
         log.info(total_msg);
 
         resp.setContentType("text/plain");
