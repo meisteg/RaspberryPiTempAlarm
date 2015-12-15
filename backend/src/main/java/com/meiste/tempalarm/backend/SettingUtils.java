@@ -24,8 +24,7 @@ public class SettingUtils {
     private static final Logger log = Logger.getLogger(SettingUtils.class.getSimpleName());
 
     public static SettingRecord getSettingRecord(final String name, final String defValue) {
-        SettingRecord setting = ofy().load().type(SettingRecord.class)
-                .filter("name", name).first().now();
+        SettingRecord setting = ofy().load().type(SettingRecord.class).id(name).now();
         if (setting == null) {
             setting = new SettingRecord();
             setting.setName(name);
