@@ -50,9 +50,6 @@ public class TemperatureCommon {
         if ((temperature < lowTempThreshold) && (prevTemp >= lowTempThreshold)) {
             Gcm.sendAlarm(Gcm.AlarmState.TEMP_TOO_LOW);
             AlertEmail.sendLowTemp(record.getDegF());
-        } else if ((temperature >= lowTempThreshold) && (prevTemp < lowTempThreshold)) {
-            Gcm.sendAlarm(Gcm.AlarmState.TEMP_NORMAL);
-            AlertEmail.sendNormTemp(record.getDegF());
         }
     }
 

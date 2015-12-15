@@ -35,18 +35,11 @@ public class AlertEmail {
     private static final Logger log = Logger.getLogger(AlertEmail.class.getSimpleName());
 
     private static final String SUBJECT_LOW_TEMP = "URGENT: Low temperature detected!";
-    private static final String SUBJECT_NORM_TEMP = "FYI: Temperature has returned to allowed range";
-
     private static final String BODY_TEMP_TEMPLATE = "Temperature is %s degrees.";
-
     private static final String FOOTER = "\n\nhttp://rasptempalarm.appspot.com";
 
     public static boolean sendLowTemp(final String temp) {
         return sendToAll(SUBJECT_LOW_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
-    }
-
-    public static boolean sendNormTemp(final String temp) {
-        return sendToAll(SUBJECT_NORM_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
     }
 
     public static boolean sendToAll(final String subject, final String body) {
