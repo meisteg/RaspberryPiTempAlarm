@@ -26,31 +26,30 @@ public class TemperatureCommon {
 
     public static void report(final float temperature, final float humidity)
             throws IOException {
-        // Retrieve last reported temperature from datastore
-        final TemperatureRecord prevRecord = ofy().load().type(TemperatureRecord.class)
-                .order("-timestamp").limit(1).first().now();
-        final float prevTemp = (prevRecord != null) ? prevRecord.getFloatDegF() : Float.NaN;
-
-        log.fine("prevTemp=" + prevTemp + ", newTemp=" + temperature +
-                 ", humidity=" + humidity);
-
-        // Check to make sure not being spammed with reports
-        if ((prevRecord != null) &&
-            ((System.currentTimeMillis() - prevRecord.getTimestamp()) < Constants.MINUTE_IN_MILLIS)) {
-            log.warning("Received new report too soon. Ignoring.");
-            return;
-        }
+        log.fine("temperature=" + temperature + ", humidity=" + humidity);
 
         final TemperatureRecord record = new TemperatureRecord();
         record.setDegF(temperature);
         record.setHumidity(humidity);
-        ofy().save().entity(record);
 
         final float lowTempThreshold = getLowTempThreshold();
-        if ((temperature < lowTempThreshold) && (prevTemp >= lowTempThreshold)) {
-            Gcm.sendAlarm(Gcm.AlarmState.TEMP_TOO_LOW);
-            AlertEmail.sendLowTemp(record.getDegF());
+        if (temperature < lowTempThreshold) {
+            log.warning("Reported temperature is below threshold!");
+
+            // Retrieve previous reported temperature from datastore
+            final TemperatureRecord prevRecord = ofy().load().type(TemperatureRecord.class)
+                    .order("-timestamp").limit(1).first().now();
+            final float prevTemp = (prevRecord != null) ? prevRecord.getFloatDegF() : Float.NaN;
+
+            // Only alarm if this is first reading below threshold
+            if (prevTemp >= lowTempThreshold) {
+                Gcm.sendAlarm(Gcm.AlarmState.TEMP_TOO_LOW);
+                AlertEmail.sendLowTemp(record.getDegF());
+            }
         }
+
+        // New record must be saved after previous temperature check
+        ofy().save().entity(record);
     }
 
     private static float getLowTempThreshold() {
