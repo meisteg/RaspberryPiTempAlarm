@@ -1,3 +1,4 @@
+<%@ page import="com.meiste.tempalarm.backend.TemperatureCommon"%>
 <%@ page import="com.meiste.tempalarm.backend.TemperatureRecord"%>
 
 <%@ page import="static com.meiste.tempalarm.backend.OfyService.ofy"%>
@@ -19,17 +20,17 @@
                     ofy().load().type(TemperatureRecord.class).order("-timestamp").first().now();
                 if (temp != null) {
 %>
-                    <h1><%= temp.getDegF() %> degrees</h1>
-                    <p><%= temp.getHumidity() %>% humidity</p>
+                    <h1><%= temp.getDegF() %>&deg;F</h1>
+                    <h2><%= temp.getHumidity() %>% humidity</h2>
                     <p><%= temp.getDateTimeString() %></p>
 <%
                 } else {
 %>
-                    <h1>N/A degrees</h1>
                     <p>No data available</p>
 <%
                 }
 %>
+                <p>Alarm set to <a href="alarm.jsp"><%= TemperatureCommon.getLowTempThreshold() %>&deg;F</a></p>
             </div>
         </div>
     </div>

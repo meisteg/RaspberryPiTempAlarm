@@ -52,7 +52,7 @@ public class TemperatureCommon {
         ofy().save().entity(record);
     }
 
-    private static float getLowTempThreshold() {
+    public static float getLowTempThreshold() {
         return Float.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LOW,
                 Constants.DEFAULT_THRES_LOW));
     }
