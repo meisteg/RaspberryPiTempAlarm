@@ -7,7 +7,6 @@
 <head>
     <title>Shop Temperature Alarm</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <meta http-equiv="refresh" content="60">
 </head>
 <body role="document" style="padding-top: 70px;">
 
@@ -22,7 +21,7 @@
 %>
                     <h1><%= temp.getDegF() %> degrees</h1>
                     <p><%= temp.getHumidity() %>% humidity</p>
-                    <p><%= temp.getRelativeTimeSpanString() %></p>
+                    <p><%= temp.getDateTimeString() %></p>
 <%
                 } else {
 %>

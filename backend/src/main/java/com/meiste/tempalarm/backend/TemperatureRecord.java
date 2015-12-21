@@ -20,6 +20,9 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 @Entity
 @Cache
 public class TemperatureRecord {
@@ -49,15 +52,11 @@ public class TemperatureRecord {
         this.degF = degF;
     }
 
-    public String getRelativeTimeSpanString() {
-        final long delta = System.currentTimeMillis() - timestamp;
+    public String getDateTimeString() {
+        final Date date = new Date(timestamp);
+        final DateFormat df = DateFormat.getDateTimeInstance();
 
-        if (delta < Constants.HOUR_IN_MILLIS) {
-            return (delta / Constants.MINUTE_IN_MILLIS) + " minute(s) ago";
-        } else if (delta < Constants.DAY_IN_MILLIS) {
-            return (delta / Constants.HOUR_IN_MILLIS) + " hour(s) ago";
-        }
-        return (delta / Constants.DAY_IN_MILLIS) + " day(s) ago";
+        return df.format(date);
     }
 
     public long getTimestamp() {

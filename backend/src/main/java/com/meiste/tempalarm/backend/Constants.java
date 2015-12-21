@@ -35,8 +35,4 @@ public class Constants {
     public static final String DEFAULT_THRES_LOW = Float.toString(45.0f);    /* degrees */
     public static final String DEFAULT_RECORD_EXPIRE = Integer.toString(2);  /* days */
     public static final String DEFAULT_REPORT_RATE = Integer.toString(60);   /* seconds */
-
-    public static final long MINUTE_IN_MILLIS = 60000;
-    public static final long HOUR_IN_MILLIS = 3600000;
-    public static final long DAY_IN_MILLIS = 86400000;
 }
