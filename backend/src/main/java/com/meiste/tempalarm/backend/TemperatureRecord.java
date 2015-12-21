@@ -22,6 +22,7 @@ import com.googlecode.objectify.annotation.Index;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Entity
 @Cache
@@ -55,6 +56,7 @@ public class TemperatureRecord {
     public String getDateTimeString() {
         final Date date = new Date(timestamp);
         final DateFormat df = DateFormat.getDateTimeInstance();
+        df.setTimeZone(TimeZone.getTimeZone("America/Chicago"));
 
         return df.format(date);
     }
