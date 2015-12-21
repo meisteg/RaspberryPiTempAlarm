@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package com.meiste.tempalarm.backend;
+
+import com.googlecode.objectify.Key;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,19 +41,14 @@ public class DeviceCleanupServlet extends HttpServlet {
 
         log.info("Cleaning up registrations older than " + exp_timestamp);
 
-        final StringBuilder sb = new StringBuilder();
-        final List<RegistrationRecord> records =
-                ofy().load().type(RegistrationRecord.class).filter("timestamp <", exp_timestamp).list();
-        for (final RegistrationRecord record : records) {
-            sb.append(record.toString()).append("\n\n");
-            ofy().delete().entity(record).now();
-        }
+        final List<Key<RegistrationRecord>> keys = ofy().load().type(RegistrationRecord.class)
+                .filter("timestamp <", exp_timestamp).keys().list();
+        ofy().delete().keys(keys);
 
-        final String subject = "TempAlarm: Cleaned up " + records.size() + " registrations";
-        final String body = sb.toString();
-        AlertEmail.sendToAdmins(subject, body);
+        final String msg = "Cleaned up " + keys.size() + " registrations";
+        log.info(msg);
 
         resp.setContentType("text/plain");
-        resp.getWriter().print(subject + "\n\n" + body);
+        resp.getWriter().print(msg);
     }
 }
