@@ -15,11 +15,18 @@
  */
 package com.meiste.tempalarm.backend;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.googlecode.objectify.Key;
+import com.meiste.tempalarm.backend.service.Firebase;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -39,16 +46,47 @@ public class TempCleanupServlet extends HttpServlet {
                 Constants.DEFAULT_RECORD_EXPIRE);
         final long exp_timestamp = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(Long.valueOf(days));
 
-        log.info("Cleaning up temperature records older than " + exp_timestamp);
+        resp.setContentType("text/plain");
+        print(Level.INFO, resp, "Cleaning up temperature records older than " + exp_timestamp);
 
         final List<Key<TemperatureRecord>> keys =
                 ofy().load().type(TemperatureRecord.class).filter("timestamp <", exp_timestamp).keys().list();
         ofy().delete().keys(keys);
 
-        final String total_msg = "Cleaned up " + keys.size() + " records";
-        log.info(total_msg);
+        print(Level.INFO, resp, "Cleaned up " + keys.size() + " local records");
 
-        resp.setContentType("text/plain");
-        resp.getWriter().print(total_msg);
+        final Firebase firebase = new Firebase();
+        firebase.addQuery("orderBy", "\"timestamp\"")
+                .addQuery("endAt", String.valueOf(exp_timestamp));
+        Firebase.Response response = firebase.get();
+        if ((response.code == HttpURLConnection.HTTP_OK) && (response.body != null)) {
+            final Type mapType = new TypeToken<Map<String, TemperatureRecord>>(){}.getType();
+            final Map<String, TemperatureRecord> map = new Gson().fromJson(response.body, mapType);
+            int deleted = 0;
+
+            for (final String key : map.keySet()) {
+                response = firebase.delete(key);
+                if ((response.code == HttpURLConnection.HTTP_OK) ||
+                        (response.code == HttpURLConnection.HTTP_NO_CONTENT)) {
+                    deleted++;
+                }
+            }
+
+            /* Check if all records were successfully deleted */
+            if (deleted == map.size()) {
+                print(Level.INFO, resp, "Cleaned up " + map.size() + " Firebase records");
+            } else {
+                print(Level.SEVERE, resp, "Only cleaned up " + deleted + " of " + map.size() +
+                        " Firebase records");
+            }
+        } else {
+            print(Level.SEVERE, resp, "Failed to get Firebase records to delete!");
+        }
+    }
+
+    private void print(final Level level, final HttpServletResponse resp, final String msg)
+            throws IOException {
+        log.log(level, msg);
+        resp.getWriter().println(msg);
     }
 }

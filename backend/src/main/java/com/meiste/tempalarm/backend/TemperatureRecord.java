@@ -15,6 +15,9 @@
  */
 package com.meiste.tempalarm.backend;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
@@ -32,9 +35,13 @@ public class TemperatureRecord {
     Long id;
 
     @Index
+    @Expose
     private long timestamp;
 
+    @Expose
     private float degF;
+
+    @Expose
     private float humidity;
 
     public TemperatureRecord() {
@@ -75,5 +82,10 @@ public class TemperatureRecord {
 
     public void setHumidity(final float humidity) {
         this.humidity = humidity;
+    }
+
+    public String toJson() {
+        final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        return gson.toJson(this);
     }
 }

@@ -21,8 +21,10 @@ public class Constants {
     public static final String ANDROID_CLIENT_ID_2 = "233631917633-djo90qn056itd2qjocvmpiu5icigi4m0.apps.googleusercontent.com";
     public static final String ANDROID_AUDIENCE = WEB_CLIENT_ID;
     public static final String EMAIL_SCOPE = "https://www.googleapis.com/auth/userinfo.email";
+    public static final String FIREBASE_URL = "https://incandescent-heat-6272.firebaseio.com/shoptemps";
 
     public static final String SETTING_EXTRA_EMAILS = "emails";
+    public static final String SETTING_FB_AUTHTOKEN = "fb.authToken";
     public static final String SETTING_GCM_API_KEY = "gcm.api.key";
     public static final String SETTING_GCM_EXPIRE = "gcm.expire";
     public static final String SETTING_THRES_LOW = "thres.low";
@@ -30,6 +32,7 @@ public class Constants {
     public static final String SETTING_REPORT_RATE = "report.rate";
 
     public static final String DEFAULT_EXTRA_EMAILS = null;
+    public static final String DEFAULT_FB_AUTHTOKEN = null;
     public static final String DEFAULT_GCM_API_KEY = "replace_this_text_with_the_real_API_Key";
     public static final String DEFAULT_GCM_EXPIRE = Integer.toString(60);    /* days */
     public static final String DEFAULT_THRES_LOW = Float.toString(45.0f);    /* degrees */

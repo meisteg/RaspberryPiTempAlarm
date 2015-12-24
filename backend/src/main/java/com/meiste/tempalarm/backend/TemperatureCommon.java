@@ -16,7 +16,10 @@
 
 package com.meiste.tempalarm.backend;
 
+import com.meiste.tempalarm.backend.service.Firebase;
+
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.logging.Logger;
 
 import static com.meiste.tempalarm.backend.OfyService.ofy;
@@ -50,6 +53,19 @@ public class TemperatureCommon {
 
         // New record must be saved after previous temperature check
         ofy().save().entity(record);
+
+        /* Catch exceptions from Firebase so they don't stop the Particle webhook */
+        try {
+            final Firebase firebase = new Firebase();
+            firebase.addQuery("print", "silent");
+            final Firebase.Response response = firebase.post(record.toJson());
+            if ((response.code != HttpURLConnection.HTTP_OK) &&
+                    (response.code != HttpURLConnection.HTTP_NO_CONTENT)) {
+                log.severe("Failed to post to Firebase: code=" + response.code);
+            }
+        } catch (final IOException e) {
+            log.severe("Failed to post to Firebase: " + e);
+        }
     }
 
     public static float getLowTempThreshold() {
