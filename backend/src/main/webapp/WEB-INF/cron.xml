@@ -8,8 +8,8 @@
     </cron>
     <cron>
         <url>/tasks/cleanup_temp</url>
-        <description>Daily cleanup of temperature data</description>
-        <schedule>every day 02:00</schedule>
+        <description>Periodic cleanup of temperature data</description>
+        <schedule>every 12 hours</schedule>
         <timezone>America/Chicago</timezone>
     </cron>
 </cronentries>
