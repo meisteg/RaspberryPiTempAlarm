@@ -65,10 +65,14 @@ public class TempCleanupServlet extends HttpServlet {
             int deleted = 0;
 
             for (final String key : map.keySet()) {
-                response = firebase.delete(key);
-                if ((response.code == HttpURLConnection.HTTP_OK) ||
-                        (response.code == HttpURLConnection.HTTP_NO_CONTENT)) {
-                    deleted++;
+                try {
+                    response = firebase.delete(key);
+                    if ((response.code == HttpURLConnection.HTTP_OK) ||
+                            (response.code == HttpURLConnection.HTTP_NO_CONTENT)) {
+                        deleted++;
+                    }
+                } catch (final IOException e) {
+                    /* Ignore error and keep looping */
                 }
             }
 
