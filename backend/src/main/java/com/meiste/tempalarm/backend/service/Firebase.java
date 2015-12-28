@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 public class Firebase {
 
     private static final String API_EXTENSION = ".json";
+    private static final int TIMEOUT_MS = 10000;
 
     private static final Logger log = Logger.getLogger(Firebase.class.getSimpleName());
 
@@ -125,7 +126,12 @@ public class Firebase {
         final URL url = new URL(fullUrl);
 
         log.fine("Opening connection to " + fullUrl);
-        return (HttpURLConnection) url.openConnection();
+        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        connection.setConnectTimeout(TIMEOUT_MS);
+        connection.setReadTimeout(TIMEOUT_MS);
+
+        return connection;
     }
 
     private Response processResponse(HttpURLConnection conn) throws IOException {
