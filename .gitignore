@@ -1,7 +1,9 @@
 # Specific files to exclude
-crashlytics.properties
-crashlytics-build.properties
-com_crashlytics_export_strings.xml
+
+# Crashlytics
+fabric.properties
+
+# Any keystores
 *.keystore
 
 # Gradle
