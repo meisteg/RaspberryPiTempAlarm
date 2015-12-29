@@ -22,18 +22,16 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.http.HttpTransport;
 
 public class AppConstants {
-    public static final String GCM_SENDER_ID = "233631917633";
     public static final String CLIENT_AUDIENCE =
             "server:client_id:233631917633-guka8vakql5qnni9j519jh7tl8brnqjt.apps.googleusercontent.com";
 
     public static final String PREF_ACCOUNT_NAME = "account_name";
+    public static final String PREF_GCM_LAST_TIME = "gcm_last_time";
+    public static final String PREF_GCM_TOKEN = "gcm_token";
     public static final String PREF_LAST_SYNC = "last_sync";
     public static final String PREF_NOTIFICATIONS = "notifications_enabled";
     public static final String PREF_REPORT_RATE = "report_rate";
     public static final String PREF_SYNC_FREQ = "sync_frequency";
-
-    public static final String INTENT_ACTION_KILL_ALARM = "com.meiste.tempalarm.killalarm";
-    public static final String INTENT_EXTRA_ALERT_MSG = "msg_resid";
 
     public static final int DATE_FORMAT_FLAGS =
             DateUtils.FORMAT_SHOW_DATE |

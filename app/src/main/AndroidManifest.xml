@@ -53,16 +53,35 @@
         </activity>
 
         <receiver
-            android:name=".gcm.GcmBroadcastReceiver"
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                 <category android:name="com.meiste.tempalarm" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".gcm.GcmIntentService" />
+        <service
+            android:name=".gcm.MsgListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".gcm.IIDListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+        
+        <service
+            android:name=".gcm.RegistrationService"
+            android:exported="false" />
 
         <provider
             android:name=".provider.RasPiProvider"
@@ -94,10 +113,6 @@
             android:noHistory="true"
             android:screenOrientation="portrait"
             android:parentActivityName=".ui.CurrentTemp" />
-
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
 
         <meta-data
             android:name="com.crashlytics.ApiKey"

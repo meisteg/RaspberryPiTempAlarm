@@ -15,10 +15,7 @@
  */
 package com.meiste.tempalarm.ui;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -29,19 +26,15 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.format.DateUtils;
 import android.view.MenuItem;
 import android.view.WindowManager;
-import android.widget.TextView;
 
-import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 
 import java.io.IOException;
 
-import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
@@ -57,9 +50,6 @@ public class Alarm extends ActionBarActivity {
     private Vibrator mVibrator;
     private MediaPlayer mMediaPlayer;
 
-    @Bind(R.id.alert_msg)
-    protected TextView mAlertMsg;
-
     private static final int KILLER = 1000;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -74,17 +64,10 @@ public class Alarm extends ActionBarActivity {
         }
     });
 
-    private BroadcastReceiver mKillReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(final Context context, final Intent intent) {
-            Timber.d("Stopping alarm due to kill intent");
-            finish();
-        }
-    };
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Timber.i("Showing alarm");
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
@@ -94,17 +77,7 @@ public class Alarm extends ActionBarActivity {
         setContentView(R.layout.alarm);
         ButterKnife.bind(this);
 
-        final Bundle extras = getIntent().getExtras();
-        if ((extras != null) && (extras.containsKey(AppConstants.INTENT_EXTRA_ALERT_MSG))) {
-            final String msg = getString(extras.getInt(AppConstants.INTENT_EXTRA_ALERT_MSG, 0));
-            Timber.i("Showing alarm: %s", msg);
-            mAlertMsg.setText(msg);
-        }
-
         getSupportActionBar().setElevation(0);
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mKillReceiver,
-                new IntentFilter(AppConstants.INTENT_ACTION_KILL_ALARM));
     }
 
     @Override
@@ -165,19 +138,11 @@ public class Alarm extends ActionBarActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mKillReceiver);
-        super.onDestroy();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(NavUtils.getParentActivityIntent(this))
-                        .startActivities();
+                dismiss();
                 return true;
         }
         return super.onOptionsItemSelected(item);

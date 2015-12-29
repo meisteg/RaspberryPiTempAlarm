@@ -20,7 +20,6 @@ import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.LoaderManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,21 +40,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.jjoe64.graphview.CustomLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.jjoe64.graphview.LineGraphView;
-import com.meiste.greg.gcm.GCMHelper;
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
-import com.meiste.tempalarm.backend.registration.Registration;
+import com.meiste.tempalarm.gcm.RegistrationService;
 import com.meiste.tempalarm.provider.RasPiContract;
 import com.meiste.tempalarm.sync.AccountUtils;
 import com.meiste.tempalarm.sync.SyncAdapter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -65,7 +62,7 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class CurrentTemp extends ActionBarActivity
-        implements GCMHelper.OnGcmRegistrationListener, LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int GPS_REQUEST = 1337;
     private static final int ACCOUNT_PICKER_REQUEST = 1338;
@@ -103,7 +100,6 @@ public class CurrentTemp extends ActionBarActivity
     };
 
     private Dialog mDialog;
-    private Registration mRegService;
     private Object mSyncObserverHandle;
     private Menu mOptionsMenu;
     private SimpleCursorAdapter mAdapter;
@@ -173,7 +169,9 @@ public class CurrentTemp extends ActionBarActivity
         if (checkPlayServices()) {
             final GoogleAccountCredential credential = AccountUtils.getCredential(this);
             if (credential.getSelectedAccountName() != null) {
-                GCMHelper.registerIfNeeded(getApplicationContext(), AppConstants.GCM_SENDER_ID, this);
+                // Start RegistrationService to register this application with GCM.
+                final Intent intent = new Intent(this, RegistrationService.class);
+                startService(intent);
             } else {
                 startActivityForResult(credential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
             }
@@ -251,14 +249,15 @@ public class CurrentTemp extends ActionBarActivity
      * the Google Play Store or enable it in the device's system settings.
      */
     private boolean checkPlayServices() {
-        final int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        final GoogleApiAvailability gApi = GoogleApiAvailability.getInstance();
+        final int resultCode = gApi.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+            if (gApi.isUserResolvableError(resultCode)) {
                 if ((mDialog != null) && mDialog.isShowing()) {
                     mDialog.dismiss();
                 }
 
-                mDialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+                mDialog = gApi.getErrorDialog(this, resultCode,
                         GPS_REQUEST, new DialogInterface.OnCancelListener() {
                             @Override
                             public void onCancel(final DialogInterface dialog) {
@@ -272,22 +271,6 @@ public class CurrentTemp extends ActionBarActivity
             }
             return false;
         }
-        return true;
-    }
-
-    @Override
-    public boolean onSendRegistrationIdToBackend(final Context context, final String regId)
-            throws IOException {
-        Timber.d("Device registered with GCM: regId = " + regId);
-
-        if (mRegService == null) {
-            mRegService = new Registration.Builder(AppConstants.HTTP_TRANSPORT,
-                    AppConstants.JSON_FACTORY, AccountUtils.getCredential(this))
-                    .setApplicationName(context.getString(R.string.app_name))
-                    .build();
-        }
-
-        mRegService.register(regId).execute();
         return true;
     }
 
