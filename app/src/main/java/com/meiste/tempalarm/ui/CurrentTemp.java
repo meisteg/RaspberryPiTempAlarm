@@ -60,8 +60,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import timber.log.Timber;
 
 public class CurrentTemp extends ActionBarActivity
@@ -109,14 +109,14 @@ public class CurrentTemp extends ActionBarActivity
     private SimpleCursorAdapter mAdapter;
     private LineGraphView mGraph;
 
-    @InjectView(R.id.temp_list)
+    @Bind(R.id.temp_list)
     protected ListView mListView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.current_temp);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         mAdapter = new SimpleCursorAdapter(this, R.layout.record, null, FROM_COLUMNS, TO_FIELDS, 0);
         mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {

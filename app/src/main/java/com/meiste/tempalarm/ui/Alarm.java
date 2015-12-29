@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ import com.meiste.tempalarm.R;
 
 import java.io.IOException;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 import timber.log.Timber;
 
@@ -57,7 +57,7 @@ public class Alarm extends ActionBarActivity {
     private Vibrator mVibrator;
     private MediaPlayer mMediaPlayer;
 
-    @InjectView(R.id.alert_msg)
+    @Bind(R.id.alert_msg)
     protected TextView mAlertMsg;
 
     private static final int KILLER = 1000;
@@ -92,7 +92,7 @@ public class Alarm extends ActionBarActivity {
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         setContentView(R.layout.alarm);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         final Bundle extras = getIntent().getExtras();
         if ((extras != null) && (extras.containsKey(AppConstants.INTENT_EXTRA_ALERT_MSG))) {
