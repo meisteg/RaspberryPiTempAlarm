@@ -234,7 +234,7 @@ public class CurrentTemp extends ActionBarActivity
                 if ((data != null) && (data.getExtras() != null)) {
                     final String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                     if (!TextUtils.isEmpty(accountName)) {
-                        Timber.d("User selected " + accountName);
+                        Timber.d("User selected %s", accountName);
                         AccountUtils.setAccount(this, accountName);
                     }
                 }

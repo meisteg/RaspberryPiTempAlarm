@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,98 +16,35 @@
 
 package com.meiste.tempalarm;
 
-import android.text.TextUtils;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import timber.log.Timber;
 
-/**
- * Mostly copy of {@link timber.log.Timber.DebugTree}, but logs to Crashlytics.
- */
-public class CrashlyticsTree implements Timber.TaggedTree {
+public class CrashlyticsTree extends Timber.DebugTree {
 
-    private static final Pattern ANONYMOUS_CLASS = Pattern.compile("\\$\\d+$");
-    private static final ThreadLocal<String> NEXT_TAG = new ThreadLocal<>();
+    @Override
+    protected void log(final int priority, final String tag, final String msg, final Throwable t) {
+        Crashlytics.log(priorityToString(priority) + "/" + tag + ": " + msg);
+    }
 
-    private static String createTag() {
-        String tag = NEXT_TAG.get();
-        if (tag != null) {
-            NEXT_TAG.remove();
-            return tag;
+    private static String priorityToString(final int priority) {
+        switch (priority) {
+            case Log.ASSERT:
+                return "WTF";
+            case Log.ERROR:
+                return "E";
+            case Log.WARN:
+                return "W";
+            case Log.INFO:
+                return "I";
+            case Log.DEBUG:
+                return "D";
+            case Log.VERBOSE:
+                return "V";
+            default:
+                return String.valueOf(priority);
         }
-
-        tag = new Throwable().getStackTrace()[5].getClassName();
-        final Matcher m = ANONYMOUS_CLASS.matcher(tag);
-        if (m.find()) {
-            tag = m.replaceAll("");
-        }
-        return tag.substring(tag.lastIndexOf('.') + 1);
-    }
-
-    @Override
-    public void tag(final String tag) {
-        NEXT_TAG.set(tag);
-    }
-
-    @Override
-    public void v(final String message, final Object... args) {
-        logToCrashlytics("V", message, args);
-    }
-
-    @Override
-    public void v(final Throwable t, final String message, final Object... args) {
-        logToCrashlytics("V", message, args);
-    }
-
-    @Override
-    public void d(final String message, final Object... args) {
-        logToCrashlytics("D", message, args);
-    }
-
-    @Override
-    public void d(final Throwable t, final String message, final Object... args) {
-        logToCrashlytics("D", message, args);
-    }
-
-    @Override
-    public void i(final String message, final Object... args) {
-        logToCrashlytics("I", message, args);
-    }
-
-    @Override
-    public void i(final Throwable t, final String message, final Object... args) {
-        logToCrashlytics("I", message, args);
-    }
-
-    @Override
-    public void w(final String message, final Object... args) {
-        logToCrashlytics("W", message, args);
-    }
-
-    @Override
-    public void w(final Throwable t, final String message, final Object... args) {
-        logToCrashlytics("W", message, args);
-    }
-
-    @Override
-    public void e(final String message, final Object... args) {
-        logToCrashlytics("E", message, args);
-    }
-
-    @Override
-    public void e(final Throwable t, final String message, final Object... args) {
-        logToCrashlytics("E", message, args);
-        Crashlytics.logException(t);
-    }
-
-    private void logToCrashlytics(final String level, final String message, final Object... args) {
-        if (TextUtils.isEmpty(message)) {
-            return;
-        }
-        Crashlytics.log(level + "/" + createTag() + ": " + String.format(message, args));
     }
 }

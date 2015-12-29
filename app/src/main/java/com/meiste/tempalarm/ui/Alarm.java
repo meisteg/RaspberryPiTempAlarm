@@ -133,7 +133,7 @@ public class Alarm extends ActionBarActivity {
                 mMediaPlayer.prepare();
                 mMediaPlayer.start();
             } catch (final IOException e) {
-                Timber.e("Failed to play alarm tone: %s", e);
+                Timber.e("Failed to play alarm tone: %s", e.toString());
             }
         }
 
