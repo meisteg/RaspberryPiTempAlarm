@@ -16,11 +16,8 @@
 package com.meiste.tempalarm.gcm;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.google.android.gms.iid.InstanceIDListenerService;
-import com.meiste.tempalarm.AppConstants;
 
 public class IIDListenerService extends InstanceIDListenerService {
 
@@ -31,10 +28,6 @@ public class IIDListenerService extends InstanceIDListenerService {
      */
     @Override
     public void onTokenRefresh() {
-        /* Ensure the next registration is sent to the server */
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putString(AppConstants.PREF_GCM_TOKEN, null).apply();
-
         final Intent intent = new Intent(this, RegistrationService.class);
         startService(intent);
     }

@@ -26,8 +26,6 @@ public class AppConstants {
             "server:client_id:233631917633-guka8vakql5qnni9j519jh7tl8brnqjt.apps.googleusercontent.com";
 
     public static final String PREF_ACCOUNT_NAME = "account_name";
-    public static final String PREF_GCM_LAST_TIME = "gcm_last_time";
-    public static final String PREF_GCM_TOKEN = "gcm_token";
     public static final String PREF_LAST_SYNC = "last_sync";
     public static final String PREF_NOTIFICATIONS = "notifications_enabled";
     public static final String PREF_REPORT_RATE = "report_rate";
