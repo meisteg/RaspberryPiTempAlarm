@@ -15,98 +15,36 @@
  */
 package com.meiste.tempalarm.ui;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.app.Dialog;
-import android.app.LoaderManager;
-import android.content.ContentResolver;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
-import android.content.SyncStatusObserver;
-import android.database.Cursor;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.text.format.DateUtils;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.jjoe64.graphview.CustomLabelFormatter;
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
-import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
+import com.meiste.tempalarm.adapters.SensorAdapter;
 import com.meiste.tempalarm.gcm.RegistrationService;
-import com.meiste.tempalarm.provider.RasPiContract;
-import com.meiste.tempalarm.sync.AccountUtils;
-import com.meiste.tempalarm.sync.SyncAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import com.meiste.tempalarm.util.DividerItemDecoration;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class CurrentTemp extends ActionBarActivity
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CurrentTemp extends AppCompatActivity {
 
     private static final int GPS_REQUEST = 1337;
-    private static final int ACCOUNT_PICKER_REQUEST = 1338;
-
-    /**
-     * Projection for querying the content provider.
-     */
-    private static final String[] PROJECTION = new String[]{
-            RasPiContract.RasPiReport._ID,
-            RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP,
-            RasPiContract.RasPiReport.COLUMN_NAME_DEGF,
-            RasPiContract.RasPiReport.COLUMN_NAME_HUMIDITY,
-    };
-
-    private static final int COLUMN_TIMESTAMP = 1;
-    private static final int COLUMN_DEGF = 2;
-    private static final int COLUMN_HUMIDITY = 3;
-
-    /**
-     * List of Cursor columns to read from when preparing an adapter to populate the ListView.
-     */
-    private static final String[] FROM_COLUMNS = new String[]{
-            RasPiContract.RasPiReport.COLUMN_NAME_TIMESTAMP,
-            RasPiContract.RasPiReport.COLUMN_NAME_DEGF,
-            RasPiContract.RasPiReport.COLUMN_NAME_HUMIDITY,
-    };
-
-    /**
-     * List of Views which will be populated by Cursor data.
-     */
-    private static final int[] TO_FIELDS = new int[]{
-            R.id.timestamp,
-            R.id.degF,
-            R.id.humidity,
-    };
 
     private Dialog mDialog;
-    private Object mSyncObserverHandle;
-    private Menu mOptionsMenu;
-    private SimpleCursorAdapter mAdapter;
-    private LineGraphView mGraph;
+    private SensorAdapter mAdapter;
 
     @Bind(R.id.temp_list)
-    protected ListView mListView;
+    protected RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -114,78 +52,29 @@ public class CurrentTemp extends ActionBarActivity
         setContentView(R.layout.current_temp);
         ButterKnife.bind(this);
 
-        mAdapter = new SimpleCursorAdapter(this, R.layout.record, null, FROM_COLUMNS, TO_FIELDS, 0);
-        mAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-            @Override
-            public boolean setViewValue(final View view, final Cursor cursor, final int columnIndex) {
-                final TextView textView = (TextView) view;
-                switch (columnIndex) {
-                    case COLUMN_TIMESTAMP:
-                        // Convert timestamp to human-readable date
-                        textView.setText(DateUtils.formatDateTime(getApplicationContext(),
-                                cursor.getLong(columnIndex), AppConstants.DATE_FORMAT_FLAGS));
-                        return true;
-                    case COLUMN_DEGF:
-                        // Restrict to one decimal place
-                        textView.setText(String.format("%.1f", cursor.getFloat(columnIndex)));
-                        return true;
-                    case COLUMN_HUMIDITY:
-                        // Restrict to one decimal place
-                        textView.setText(String.format("%.1f %%", cursor.getFloat(columnIndex)));
-                        return true;
-                }
-                return false;
-            }
-        });
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, 1));
 
-        final View header = getLayoutInflater().inflate(R.layout.record_header, mListView, false);
-        final FrameLayout frameLayout = ButterKnife.findById(header, R.id.graph_placeholder);
-        mGraph = new LineGraphView(this, "");
-        mGraph.setDrawBackground(true);
-        mGraph.setBackgroundColor(getResources().getColor(R.color.primary_graph));
-        mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
-            @Override
-            public String formatLabel(final double value, final boolean isValueX) {
-                if (isValueX) {
-                    return DateUtils.formatDateTime(getApplicationContext(),
-                            (long) value, AppConstants.DATE_FORMAT_FLAGS_GRAPH);
-                }
-                return String.format(Locale.getDefault(), "%.1f", value);
-            }
-        });
-        mGraph.getGraphViewStyle().setNumHorizontalLabels(AppConstants.GRAPH_NUM_HORIZONTAL_LABELS);
-        frameLayout.addView(mGraph);
-
-        mListView.addHeaderView(header, null, false);
-        mListView.setAdapter(mAdapter);
-        getLoaderManager().initLoader(0, null, this);
+        mAdapter = new SensorAdapter(this);
+        mRecyclerView.setAdapter(mAdapter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mSyncStatusObserver.onStatusChanged(0);
 
         if (checkPlayServices()) {
-            final GoogleAccountCredential credential = AccountUtils.getCredential(this);
-            if (credential.getSelectedAccountName() != null) {
-                // Start RegistrationService to register this application with GCM.
-                final Intent intent = new Intent(this, RegistrationService.class);
-                startService(intent);
-            } else {
-                startActivityForResult(credential.newChooseAccountIntent(), ACCOUNT_PICKER_REQUEST);
-            }
+            // Start RegistrationService to register this application with GCM.
+            final Intent intent = new Intent(this, RegistrationService.class);
+            startService(intent);
 
-            // Watch for sync state changes
-            final int mask = ContentResolver.SYNC_OBSERVER_TYPE_PENDING |
-                    ContentResolver.SYNC_OBSERVER_TYPE_ACTIVE;
-            mSyncObserverHandle = ContentResolver.addStatusChangeListener(mask, mSyncStatusObserver);
+            mAdapter.startSync();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        mOptionsMenu = menu;
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
@@ -196,11 +85,6 @@ public class CurrentTemp extends ActionBarActivity
             case R.id.action_settings:
                 startActivity(new Intent(this, Settings.class));
                 return true;
-            case R.id.action_refresh:
-                if (!SyncAdapter.requestSync(this, true)) {
-                    Toast.makeText(this, R.string.error_refresh, Toast.LENGTH_LONG).show();
-                }
-                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -209,10 +93,7 @@ public class CurrentTemp extends ActionBarActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if (mSyncObserverHandle != null) {
-            ContentResolver.removeStatusChangeListener(mSyncObserverHandle);
-            mSyncObserverHandle = null;
-        }
+        mAdapter.stopSync();
     }
 
     @Override
@@ -223,24 +104,6 @@ public class CurrentTemp extends ActionBarActivity
         }
 
         super.onDestroy();
-    }
-
-    @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        switch (requestCode) {
-            case ACCOUNT_PICKER_REQUEST:
-                if ((data != null) && (data.getExtras() != null)) {
-                    final String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                    if (!TextUtils.isEmpty(accountName)) {
-                        Timber.d("User selected %s", accountName);
-                        AccountUtils.setAccount(this, accountName);
-                    }
-                }
-                break;
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
-                break;
-        }
     }
 
     /**
@@ -272,114 +135,5 @@ public class CurrentTemp extends ActionBarActivity
             return false;
         }
         return true;
-    }
-
-    /**
-     * Set the state of the Refresh button. If a sync is active, turn on the ProgressBar widget.
-     * Otherwise, turn it off.
-     *
-     * @param refreshing True if an active sync is occurring, false otherwise
-     */
-    public void setRefreshActionButtonState(final boolean refreshing) {
-        if (mOptionsMenu == null) {
-            return;
-        }
-
-        final MenuItem refreshItem = mOptionsMenu.findItem(R.id.action_refresh);
-        if (refreshItem != null) {
-            if (refreshing) {
-                refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
-            } else {
-                refreshItem.setActionView(null);
-            }
-        }
-    }
-
-    /**
-     * Create a new anonymous SyncStatusObserver. It's attached to the app's ContentResolver in
-     * onResume(), and removed in onPause(). If status changes, it sets the state of the Refresh
-     * button. If a sync is active or pending, the Refresh button is replaced by an indeterminate
-     * ProgressBar; otherwise, the button itself is displayed.
-     */
-    private final SyncStatusObserver mSyncStatusObserver = new SyncStatusObserver() {
-        /** Callback invoked when the sync adapter status changes. */
-        @Override
-        public void onStatusChanged(final int which) {
-            runOnUiThread(new Runnable() {
-                /**
-                 * The SyncAdapter runs on a background thread. To update the UI, onStatusChanged()
-                 * runs on the UI thread.
-                 */
-                @Override
-                public void run() {
-                    final Account account = AccountUtils.getAccount(getApplicationContext());
-                    if (account == null) {
-                        // This shouldn't happen, but set the status to "not refreshing".
-                        setRefreshActionButtonState(false);
-                        return;
-                    }
-
-                    // Test the ContentResolver to see if the sync adapter is active or pending.
-                    // Set the state of the refresh button accordingly.
-                    final boolean syncActive = ContentResolver.isSyncActive(
-                            account, RasPiContract.CONTENT_AUTHORITY);
-                    final boolean syncPending = ContentResolver.isSyncPending(
-                            account, RasPiContract.CONTENT_AUTHORITY);
-                    setRefreshActionButtonState(syncActive || syncPending);
-                }
-            });
-        }
-    };
-
-    /**
-     * Query the content provider for data.
-     *
-     * <p>Loaders do queries in a background thread. They also provide a ContentObserver that is
-     * triggered when data in the content provider changes. When the sync adapter updates the
-     * content provider, the ContentObserver responds by resetting the loader and then reloading
-     * it.
-     */
-    @Override
-    public Loader<Cursor> onCreateLoader(final int id, final Bundle bundle) {
-        return new CursorLoader(
-                this,                                        // Context
-                RasPiContract.RasPiReport.CONTENT_URI,       // URI
-                PROJECTION,                                  // Projection
-                null,                                        // Selection
-                null,                                        // Selection args
-                RasPiContract.RasPiReport.SORT_NEWEST_FIRST  // Sort
-        );
-    }
-
-    /**
-     * Move the Cursor returned by the query into the ListView adapter. This refreshes the existing
-     * UI with the data in the Cursor.
-     */
-    @Override
-    public void onLoadFinished(final Loader<Cursor> loader, final Cursor cursor) {
-        mGraph.removeAllSeries();
-        final List<GraphView.GraphViewData> data = new ArrayList<>();
-        cursor.moveToLast();
-        while (cursor.moveToPrevious()) {
-            data.add(new GraphView.GraphViewData(cursor.getLong(COLUMN_TIMESTAMP),
-                    cursor.getFloat(COLUMN_DEGF)));
-        }
-        final GraphViewSeries exampleSeries = new GraphViewSeries(
-                data.toArray(new GraphView.GraphViewData[data.size()]));
-        mGraph.addSeries(exampleSeries);
-
-        mAdapter.changeCursor(cursor);
-    }
-
-    /**
-     * Called when the ContentObserver defined for the content provider detects that data has
-     * changed. The ContentObserver resets the loader, and then re-runs the loader. In the adapter,
-     * set the Cursor value to null. This removes the reference to the Cursor, allowing it to be
-     * garbage-collected.
-     */
-    @Override
-    public void onLoaderReset(final Loader<Cursor> loader) {
-        mAdapter.changeCursor(null);
-        mGraph.removeAllSeries();
     }
 }

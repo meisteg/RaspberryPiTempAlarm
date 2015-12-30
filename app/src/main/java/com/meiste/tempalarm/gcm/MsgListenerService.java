@@ -30,7 +30,6 @@ import android.telephony.TelephonyManager;
 import com.google.android.gms.gcm.GcmListenerService;
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
-import com.meiste.tempalarm.sync.SyncAdapter;
 import com.meiste.tempalarm.ui.Alarm;
 import com.meiste.tempalarm.ui.CurrentTemp;
 
@@ -44,11 +43,7 @@ public class MsgListenerService extends GcmListenerService {
 
         // Only show notification if the user wants notifications
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final boolean ok2notify = prefs.getBoolean(AppConstants.PREF_NOTIFICATIONS, true);
-
-        SyncAdapter.requestSync(this, ok2notify);
-
-        if (ok2notify) {
+        if (prefs.getBoolean(AppConstants.PREF_NOTIFICATIONS, true)) {
             final TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             final boolean inCall = tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
 

@@ -26,7 +26,7 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -39,7 +39,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import timber.log.Timber;
 
-public class Alarm extends ActionBarActivity {
+public class Alarm extends AppCompatActivity {
 
     /** Play alarm up to 10 minutes before silencing */
     private static final long ALARM_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;

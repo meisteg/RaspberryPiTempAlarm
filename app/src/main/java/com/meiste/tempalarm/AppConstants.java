@@ -17,19 +17,10 @@ package com.meiste.tempalarm;
 
 import android.text.format.DateUtils;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
-import com.google.api.client.http.HttpTransport;
-
 public class AppConstants {
-    public static final String CLIENT_AUDIENCE =
-            "server:client_id:233631917633-guka8vakql5qnni9j519jh7tl8brnqjt.apps.googleusercontent.com";
+    public static final String FIREBASE_URL = "https://incandescent-heat-6272.firebaseio.com/shoptemps";
 
-    public static final String PREF_ACCOUNT_NAME = "account_name";
-    public static final String PREF_LAST_SYNC = "last_sync";
     public static final String PREF_NOTIFICATIONS = "notifications_enabled";
-    public static final String PREF_REPORT_RATE = "report_rate";
-    public static final String PREF_SYNC_FREQ = "sync_frequency";
 
     public static final int DATE_FORMAT_FLAGS =
             DateUtils.FORMAT_SHOW_DATE |
@@ -44,7 +35,4 @@ public class AppConstants {
             DateUtils.FORMAT_NO_MIDNIGHT;
 
     public static final int GRAPH_NUM_HORIZONTAL_LABELS = 4;
-
-    public static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
-    public static final AndroidJsonFactory JSON_FACTORY = new AndroidJsonFactory();
 }

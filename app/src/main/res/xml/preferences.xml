@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014 Gregory S. Meiste <http://gregmeiste.com>
+     Copyright (C) 2014-2015 Gregory S. Meiste <http://gregmeiste.com>
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -17,12 +17,6 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="@string/pref_header_personal">
-        <Preference
-            android:key="account"
-            android:title="@string/pref_title_account"/>
-    </PreferenceCategory>
-
     <PreferenceCategory android:title="@string/pref_header_general">
         <CheckBoxPreference
             android:key="notifications_enabled"
@@ -30,12 +24,6 @@
             android:summary="@string/pref_summary_notifications"
             android:defaultValue="true" />
 
-        <ListPreference
-            android:key="sync_frequency"
-            android:title="@string/pref_title_sync_frequency"
-            android:entries="@array/pref_sync_frequency_titles"
-            android:entryValues="@array/pref_sync_frequency_values"
-            android:defaultValue="@string/pref_default_sync_frequency" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_header_about">

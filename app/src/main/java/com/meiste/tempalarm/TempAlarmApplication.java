@@ -19,6 +19,8 @@ package com.meiste.tempalarm;
 import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
+import com.firebase.client.Firebase;
+
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
@@ -36,6 +38,9 @@ public class TempAlarmApplication extends Application {
             Fabric.with(this, new Crashlytics());
             Timber.plant(new CrashlyticsTree());
         }
+
+        Firebase.setAndroidContext(this);
+        Firebase.getDefaultConfig().setPersistenceEnabled(true);
 
         Timber.v("Application created");
     }
