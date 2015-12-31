@@ -20,6 +20,8 @@ import android.text.format.DateUtils;
 
 import com.meiste.tempalarm.AppConstants;
 
+import java.util.Locale;
+
 public class SensorData {
 
     public long timestamp;
@@ -35,11 +37,11 @@ public class SensorData {
     }
 
     public String getDegF() {
-        return String.format("%.1f", degF);
+        return String.format(Locale.getDefault(), "%.1f", degF);
     }
 
     public String getHumidity() {
-        return String.format("%.1f %%", humidity);
+        return String.format(Locale.getDefault(), "%.1f %%", humidity);
     }
 
     @Override
