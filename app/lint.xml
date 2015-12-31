@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore UnusedResources in Google's file -->
+    <issue id="UnusedResources">
+        <ignore path="build/generated/res/google-services/**/values.xml" />
+    </issue>
+
+    <!-- Change the severity to error -->
+    <issue id="DefaultLocale" severity="error" />
+</lint>
