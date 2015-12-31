@@ -88,9 +88,13 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public SensorAdapter(final Context context) {
         mContext = context.getApplicationContext();
 
+        // getColor(id) was replaced in API level 23 with getColor(id, theme)
+        //noinspection deprecation
+        final int bgColor = context.getResources().getColor(R.color.primary_graph);
+
         mGraph = new LineGraphView(context, "");
         mGraph.setDrawBackground(true);
-        mGraph.setBackgroundColor(context.getResources().getColor(R.color.primary_graph));
+        mGraph.setBackgroundColor(bgColor);
         mGraph.setCustomLabelFormatter(new CustomLabelFormatter() {
             @Override
             public String formatLabel(final double value, final boolean isValueX) {
