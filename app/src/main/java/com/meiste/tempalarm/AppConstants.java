@@ -18,7 +18,9 @@ package com.meiste.tempalarm;
 import android.text.format.DateUtils;
 
 public class AppConstants {
-    public static final String FIREBASE_URL = "https://incandescent-heat-6272.firebaseio.com/shoptemps";
+    public static final String FIREBASE_URL_BASE = "https://incandescent-heat-6272.firebaseio.com/";
+    public static final String FIREBASE_URL_SENSOR = FIREBASE_URL_BASE + "shoptemps";
+    public static final String FIREBASE_URL_CONNECTED = FIREBASE_URL_BASE + ".info/connected";
 
     public static final String PREF_NOTIFICATIONS = "notifications_enabled";
 

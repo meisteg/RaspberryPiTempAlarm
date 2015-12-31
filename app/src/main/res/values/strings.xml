@@ -21,6 +21,8 @@
 
     <string name="action_settings">Settings</string>
 
+    <string name="disconnected">Disconnected</string>
+
     <string name="header_timestamp">Time</string>
     <string name="header_degrees">Degrees</string>
     <string name="header_humidity">Humidity</string>

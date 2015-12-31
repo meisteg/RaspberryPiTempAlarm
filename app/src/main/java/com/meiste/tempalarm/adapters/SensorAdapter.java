@@ -103,7 +103,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         });
         mGraph.getGraphViewStyle().setNumHorizontalLabels(AppConstants.GRAPH_NUM_HORIZONTAL_LABELS);
 
-        final Firebase firebase = new Firebase(AppConstants.FIREBASE_URL);
+        final Firebase firebase = new Firebase(AppConstants.FIREBASE_URL_SENSOR);
         mFirebaseQuery = firebase.orderByChild("timestamp").limitToLast(NUM_RECORDS);
         mFirebaseSyncing = false;
     }
@@ -191,7 +191,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mGraph.addSeries(temperatureSeries);
     }
 
-    private ChildEventListener mChildEventListener = new ChildEventListener() {
+    private final ChildEventListener mChildEventListener = new ChildEventListener() {
         @Override
         public void onChildAdded(final DataSnapshot snapshot, final String prevChild) {
             if (mFirebaseAllowChild) {
@@ -253,9 +253,11 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
      * This allows us to perform one big update to get initial state, then
      * use the child updates to modify from there.
      */
-    private ValueEventListener mValueEventListener = new ValueEventListener() {
+    private final ValueEventListener mValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(final DataSnapshot snapshot) {
+            Timber.v("onDataChange: %d records", snapshot.getChildrenCount());
+
             mFirebaseAllowChild = true;
             mListData.clear();
             mGraphData.clear();

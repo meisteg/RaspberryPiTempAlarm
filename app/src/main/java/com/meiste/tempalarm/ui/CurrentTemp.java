@@ -19,14 +19,20 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.adapters.SensorAdapter;
 import com.meiste.tempalarm.gcm.RegistrationService;
@@ -42,6 +48,8 @@ public class CurrentTemp extends AppCompatActivity {
 
     private Dialog mDialog;
     private SensorAdapter mAdapter;
+    private Firebase mFirebase;
+    private Snackbar mSnackbar;
 
     @Bind(R.id.temp_list)
     protected RecyclerView mRecyclerView;
@@ -58,11 +66,15 @@ public class CurrentTemp extends AppCompatActivity {
 
         mAdapter = new SensorAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
+
+        mFirebase = new Firebase(AppConstants.FIREBASE_URL_CONNECTED);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        mFirebase.addValueEventListener(mValueEventListener);
 
         if (checkPlayServices()) {
             // Start RegistrationService to register this application with GCM.
@@ -94,10 +106,13 @@ public class CurrentTemp extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mAdapter.stopSync();
+        mFirebase.removeEventListener(mValueEventListener);
     }
 
     @Override
     protected void onDestroy() {
+        Timber.v("onDestroy");
+
         // Hide dialogs to prevent window leaks on orientation changes
         if ((mDialog != null) && mDialog.isShowing()) {
             mDialog.dismiss();
@@ -136,4 +151,28 @@ public class CurrentTemp extends AppCompatActivity {
         }
         return true;
     }
+
+    private final ValueEventListener mValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(final DataSnapshot snapshot) {
+            final boolean connected = snapshot.getValue(Boolean.class);
+            Timber.d("Firebase %sconnected", connected ? "" : "dis");
+
+            if (connected) {
+                if (mSnackbar != null) {
+                    mSnackbar.dismiss();
+                    mSnackbar = null;
+                }
+            } else {
+                mSnackbar = Snackbar.make(mRecyclerView, R.string.disconnected,
+                        Snackbar.LENGTH_INDEFINITE);
+                mSnackbar.show();
+            }
+        }
+
+        @Override
+        public void onCancelled(final FirebaseError error) {
+            Timber.e("Connected listener was cancelled");
+        }
+    };
 }
