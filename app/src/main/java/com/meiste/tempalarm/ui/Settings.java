@@ -32,7 +32,6 @@ public class Settings extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final Fragment f = getFragmentManager().findFragmentById(android.R.id.content);
         if (f == null || !(f instanceof SettingsFragment)) {
