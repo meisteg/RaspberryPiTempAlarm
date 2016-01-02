@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,33 @@ public class Gcm {
 
     private static final Logger log = Logger.getLogger(Gcm.class.getSimpleName());
 
+    private static final String TOPIC_TEMP_LOW = "/topics/tempLow";
     private static final String COLLAPSE_KEY_ALARM = "alarm";
     private static final String STATE_KEY = "state";
+    private static final int NUM_RETRIES = 3;
+    private static final int TTL_SECONDS = 600; // 10 minutes
 
     public enum AlarmState {
         TEMP_TOO_LOW, TEMP_NORMAL
     }
     public static void sendAlarm(final AlarmState state) throws IOException {
-        send(COLLAPSE_KEY_ALARM, state.name());
+        send(COLLAPSE_KEY_ALARM, state.name());  // old way
+        send();                                  // new way
+    }
+
+    public static void send() throws IOException {
+        final Sender sender = new Sender(getApiKey());
+        final Message msg = new Message.Builder()
+                .collapseKey(COLLAPSE_KEY_ALARM)
+                .priority(Message.Priority.HIGH)
+                .timeToLive(TTL_SECONDS)
+                .build();
+        final Result result = sender.send(msg, TOPIC_TEMP_LOW, NUM_RETRIES);
+        if (result.getMessageId() != null) {
+            log.fine("Message sent to " + TOPIC_TEMP_LOW);
+        } else {
+            log.warning("Error when sending message: " + result.getErrorCodeName());
+        }
     }
 
     private static void send(final String key, final String state) throws IOException {
@@ -44,7 +63,7 @@ public class Gcm {
         final Message msg = new Message.Builder().collapseKey(key).addData(STATE_KEY, state).build();
         final List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
         for (final RegistrationRecord record : records) {
-            final Result result = sender.send(msg, record.getRegId(), 5);
+            final Result result = sender.send(msg, record.getRegId(), NUM_RETRIES);
             if (result.getMessageId() != null) {
                 log.fine("Message sent to " + record.getRegId());
                 final String canonicalRegId = result.getCanonicalRegistrationId();
