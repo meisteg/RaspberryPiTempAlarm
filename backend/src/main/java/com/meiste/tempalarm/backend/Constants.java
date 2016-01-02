@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public class Constants {
     public static final String EMAIL_SCOPE = "https://www.googleapis.com/auth/userinfo.email";
     public static final String FIREBASE_URL = "https://incandescent-heat-6272.firebaseio.com/shoptemps";
 
-    public static final String SETTING_EXTRA_EMAILS = "emails";
+    public static final String SETTING_EMAILS = "emails";
     public static final String SETTING_FB_AUTHTOKEN = "fb.authToken";
     public static final String SETTING_GCM_API_KEY = "gcm.api.key";
     public static final String SETTING_GCM_EXPIRE = "gcm.expire";
@@ -31,7 +31,7 @@ public class Constants {
     public static final String SETTING_RECORD_EXPIRE = "record.expire";
     public static final String SETTING_REPORT_RATE = "report.rate";
 
-    public static final String DEFAULT_EXTRA_EMAILS = null;
+    public static final String DEFAULT_EMAILS = "admins";
     public static final String DEFAULT_FB_AUTHTOKEN = null;
     public static final String DEFAULT_GCM_API_KEY = "replace_this_text_with_the_real_API_Key";
     public static final String DEFAULT_GCM_EXPIRE = Integer.toString(60);    /* days */

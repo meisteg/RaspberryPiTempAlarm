@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package com.meiste.tempalarm.backend;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -28,8 +27,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import static com.meiste.tempalarm.backend.OfyService.ofy;
-
 public class AlertEmail {
 
     private static final Logger log = Logger.getLogger(AlertEmail.class.getSimpleName());
@@ -39,29 +36,11 @@ public class AlertEmail {
     private static final String FOOTER = "\n\nhttp://rasptempalarm.appspot.com";
 
     public static boolean sendLowTemp(final String temp) {
-        return sendToAll(SUBJECT_LOW_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
+        return send(SUBJECT_LOW_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
     }
 
-    public static boolean sendToAll(final String subject, final String body) {
-        return sendTo(subject, body, getRecipients());
-    }
-
-    public static boolean sendToAdmins(final String subject, final String body) {
-        try {
-            return sendTo(subject, body, new InternetAddress("admins"));
-        } catch (final AddressException e) {
-            log.severe("Failed to send message: " + e);
-            return false;
-        }
-    }
-
-    private static boolean sendTo(final String subject, final String body,
-                                  final InternetAddress... recipients) {
-        if ((subject == null) || (body == null) || (recipients == null)) {
-            log.warning("Parameters to sendTo cannot be null.");
-            return false;
-        }
-
+    private static boolean send(final String subject, final String body) {
+        final InternetAddress[] recipients = getRecipients();
         if (recipients.length == 0) {
             log.warning("No recipients specified.");
             return false;
@@ -91,23 +70,15 @@ public class AlertEmail {
      */
     private static InternetAddress[] getRecipients() {
         final Set<InternetAddress> recipients = new HashSet<>();
-        final List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
-        for (final RegistrationRecord record : records) {
-            try {
-                recipients.add(new InternetAddress(record.getUserEmail()));
-            } catch (final AddressException e) {
-                log.severe("Failed to add " + record.getUserEmail() + " as recipient");
-            }
-        }
 
-        final String extraEmails = SettingUtils.getSettingValue(Constants.SETTING_EXTRA_EMAILS,
-                Constants.DEFAULT_EXTRA_EMAILS);
-        if (extraEmails != null) {
-            for (final String extraEmail : extraEmails.split(",")) {
+        final String emails =
+                SettingUtils.getSettingValue(Constants.SETTING_EMAILS, Constants.DEFAULT_EMAILS);
+        if (emails != null) {
+            for (final String addr : emails.split(",")) {
                 try {
-                    recipients.add(new InternetAddress(extraEmail));
+                    recipients.add(new InternetAddress(addr));
                 } catch (final AddressException e) {
-                    log.severe("Failed to add " + extraEmail + " as recipient");
+                    log.severe("Failed to add " + addr + " as recipient");
                 }
             }
         }
