@@ -28,7 +28,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 200
-        versionName "2.0.0"
+        versionName "2.0.0-" + gitSha()
     }
 
     compileOptions {
@@ -65,6 +65,10 @@ android {
             versionNameSuffix "-dev"
         }
     }
+}
+
+def gitSha() {
+    return 'git describe --always --dirty --match none'.execute().text.trim()
 }
 
 dependencies {
