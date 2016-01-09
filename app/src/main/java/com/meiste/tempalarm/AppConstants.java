@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ public class AppConstants {
     public static final String FIREBASE_URL_CONNECTED = FIREBASE_URL_BASE + ".info/connected";
 
     public static final String PREF_NOTIFICATIONS = "notifications_enabled";
+    public static final String PREF_NUM_RECORDS = "num_records";
+
+    public static final int DEFAULT_NUM_RECORDS = 120;
 
     public static final int DATE_FORMAT_FLAGS =
             DateUtils.FORMAT_SHOW_DATE |

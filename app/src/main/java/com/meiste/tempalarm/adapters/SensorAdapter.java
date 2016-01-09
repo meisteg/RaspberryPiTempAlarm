@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2015-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package com.meiste.tempalarm.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -46,17 +48,17 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+import static com.meiste.tempalarm.AppConstants.DEFAULT_NUM_RECORDS;
+import static com.meiste.tempalarm.AppConstants.PREF_NUM_RECORDS;
 
-    private static final int NUM_RECORDS = 120;
+public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final LineGraphView mGraph;
     private final Context mContext;
     private final List<SensorData> mListData = new ArrayList<>();
     private final List<GraphView.GraphViewData> mGraphData = new ArrayList<>();
-    private final Query mFirebaseQuery;
 
-    private boolean mFirebaseSyncing;
+    private Query mFirebaseQuery;
     private boolean mFirebaseAllowChild;
 
     public static class HeaderViewHolder extends RecyclerView.ViewHolder {
@@ -106,28 +108,28 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             }
         });
         mGraph.getGraphViewStyle().setNumHorizontalLabels(AppConstants.GRAPH_NUM_HORIZONTAL_LABELS);
-
-        final Firebase firebase = new Firebase(AppConstants.FIREBASE_URL_SENSOR);
-        mFirebaseQuery = firebase.orderByChild("timestamp").limitToLast(NUM_RECORDS);
-        mFirebaseSyncing = false;
     }
 
-    public void startSync() {
-        if (!mFirebaseSyncing) {
+    public synchronized void startSync() {
+        if (mFirebaseQuery == null) {
             Timber.d("Starting Firebase sync");
 
-            mFirebaseSyncing = true;
             mFirebaseAllowChild = false;
+
+            final SharedPreferences prefs =
+                    PreferenceManager.getDefaultSharedPreferences(mContext);
+            mFirebaseQuery = new Firebase(AppConstants.FIREBASE_URL_SENSOR)
+                    .orderByChild("timestamp")
+                    .limitToLast(prefs.getInt(PREF_NUM_RECORDS, DEFAULT_NUM_RECORDS));
             mFirebaseQuery.addChildEventListener(mChildEventListener);
             mFirebaseQuery.addListenerForSingleValueEvent(mValueEventListener);
         }
     }
 
-    public void stopSync() {
-        if (mFirebaseSyncing) {
+    public synchronized void stopSync() {
+        if (mFirebaseQuery != null) {
             Timber.d("Stopping Firebase sync");
 
-            mFirebaseSyncing = false;
             mFirebaseQuery.removeEventListener(mChildEventListener);
 
             /*
@@ -137,6 +139,8 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             if (!mFirebaseAllowChild) {
                 mFirebaseQuery.removeEventListener(mValueEventListener);
             }
+
+            mFirebaseQuery = null;
         }
     }
 

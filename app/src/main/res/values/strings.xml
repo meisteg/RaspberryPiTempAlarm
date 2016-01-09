@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014-2015 Gregory S. Meiste <http://gregmeiste.com>
+     Copyright (C) 2014-2016 Gregory S. Meiste <http://gregmeiste.com>
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -35,9 +35,25 @@
 
     <string name="pref_title_build">Build</string>
     <string name="pref_title_notifications">Notifications</string>
+    <string name="pref_title_num_records">Sensor Readings</string>
 
     <string name="pref_summary_notifications">Show low temperature alerts</string>
+    <string name="pref_summary_num_records">Show %1$s readings on graph</string>
 
     <string name="title_activity_settings">Settings</string>
+    
+    <string-array name="pref_num_records_entries">
+        <item>60 readings</item>
+        <item>120 readings</item>
+        <item>180 readings</item>
+        <item>240 readings</item>
+    </string-array>
+
+    <string-array name="pref_num_records_values" translatable="false">
+        <item>60</item>
+        <item>120</item>
+        <item>180</item>
+        <item>240</item>
+    </string-array>
 
 </resources>
