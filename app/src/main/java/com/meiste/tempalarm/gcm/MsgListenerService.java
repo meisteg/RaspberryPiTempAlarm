@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class MsgListenerService extends GcmListenerService {
         final Notification notification = new NotificationCompat.Builder(this)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(android.R.drawable.stat_sys_warning)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher))
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
                 .setTicker(notifyText)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(notifyText)
