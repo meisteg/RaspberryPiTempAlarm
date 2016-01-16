@@ -74,14 +74,14 @@ public class CurrentTemp extends AppCompatActivity {
 
         mAdapter = new SensorAdapter(this, mProgressBar);
         mRecyclerView.setAdapter(mAdapter);
-
-        mFirebase = new Firebase(AppConstants.FIREBASE_URL_CONNECTED);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        Firebase.goOnline();
+        mFirebase = new Firebase(AppConstants.FIREBASE_URL_CONNECTED);
         mFirebase.addValueEventListener(mValueEventListener);
 
         if (checkPlayServices()) {
@@ -114,7 +114,10 @@ public class CurrentTemp extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mAdapter.stopSync();
+
         mFirebase.removeEventListener(mValueEventListener);
+        mFirebase = null;
+        Firebase.goOffline();
     }
 
     @Override
