@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -54,6 +56,12 @@ public class CurrentTemp extends AppCompatActivity {
     @Bind(R.id.temp_list)
     protected RecyclerView mRecyclerView;
 
+    @Bind(R.id.main_content)
+    protected FrameLayout mFrameLayout;
+
+    @Bind(R.id.progress)
+    protected ProgressBar mProgressBar;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,7 +72,7 @@ public class CurrentTemp extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, 1));
 
-        mAdapter = new SensorAdapter(this);
+        mAdapter = new SensorAdapter(this, mProgressBar);
         mRecyclerView.setAdapter(mAdapter);
 
         mFirebase = new Firebase(AppConstants.FIREBASE_URL_CONNECTED);
@@ -163,8 +171,8 @@ public class CurrentTemp extends AppCompatActivity {
                     mSnackbar.dismiss();
                     mSnackbar = null;
                 }
-            } else {
-                mSnackbar = Snackbar.make(mRecyclerView, R.string.disconnected,
+            } else if (mSnackbar == null) {
+                mSnackbar = Snackbar.make(mFrameLayout, R.string.disconnected,
                         Snackbar.LENGTH_INDEFINITE);
                 mSnackbar.show();
             }

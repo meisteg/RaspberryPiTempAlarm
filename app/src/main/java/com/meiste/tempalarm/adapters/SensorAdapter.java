@@ -57,6 +57,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private final Context mContext;
     private final List<SensorData> mListData = new ArrayList<>();
     private final List<GraphView.GraphViewData> mGraphData = new ArrayList<>();
+    private final View mLoadingView;
 
     private Query mFirebaseQuery;
     private boolean mFirebaseAllowChild;
@@ -87,8 +88,9 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    public SensorAdapter(final Context context) {
+    public SensorAdapter(final Context context, final View view) {
         mContext = context.getApplicationContext();
+        mLoadingView = view;
 
         // getColor(id) was replaced in API level 23 with getColor(id, theme)
         //noinspection deprecation
@@ -274,6 +276,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 addSensorData(postSnapshot.getValue(SensorData.class));
             }
 
+            mLoadingView.setVisibility(View.GONE);
             notifyDataSetChanged();
             updateGraph();
         }
