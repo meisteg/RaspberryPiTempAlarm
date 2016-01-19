@@ -117,7 +117,15 @@ public class CurrentTemp extends AppCompatActivity {
 
         mFirebase.removeEventListener(mValueEventListener);
         mFirebase = null;
-        Firebase.goOffline();
+
+        /*
+         * On a device rotation, there is no point disconnecting from Firebase
+         * only to immediately have to reconnect.
+         */
+        if (!isChangingConfigurations()) {
+            Timber.v("Forcing Firebase offline");
+            Firebase.goOffline();
+        }
     }
 
     @Override
