@@ -38,6 +38,4 @@ public class AppConstants {
             DateUtils.FORMAT_SHOW_TIME |
             DateUtils.FORMAT_NO_NOON |
             DateUtils.FORMAT_NO_MIDNIGHT;
-
-    public static final int GRAPH_NUM_HORIZONTAL_LABELS = 4;
 }

@@ -17,6 +17,7 @@ package com.meiste.tempalarm.adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -92,9 +93,11 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mContext = context.getApplicationContext();
         mLoadingView = view;
 
+        final Resources res = context.getResources();
+
         // getColor(id) was replaced in API level 23 with getColor(id, theme)
         //noinspection deprecation
-        final int bgColor = context.getResources().getColor(R.color.primary_graph);
+        final int bgColor = res.getColor(R.color.primary_graph);
 
         mGraph = new LineGraphView(context, "");
         mGraph.setDrawBackground(true);
@@ -109,7 +112,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 return String.format(Locale.getDefault(), "%.1f", value);
             }
         });
-        mGraph.getGraphViewStyle().setNumHorizontalLabels(AppConstants.GRAPH_NUM_HORIZONTAL_LABELS);
+        mGraph.getGraphViewStyle().setTextSize(res.getDimension(R.dimen.graph_text_size));
     }
 
     public synchronized void startSync() {
