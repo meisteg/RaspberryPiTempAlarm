@@ -25,7 +25,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
+import android.view.View;
 import android.widget.ProgressBar;
 
 import com.firebase.client.DataSnapshot;
@@ -56,8 +56,8 @@ public class CurrentTemp extends AppCompatActivity {
     @Bind(R.id.temp_list)
     protected RecyclerView mRecyclerView;
 
-    @Bind(R.id.main_content)
-    protected FrameLayout mFrameLayout;
+    @Bind(android.R.id.content)
+    protected View mContentView;
 
     @Bind(R.id.progress)
     protected ProgressBar mProgressBar;
@@ -183,7 +183,7 @@ public class CurrentTemp extends AppCompatActivity {
                     mSnackbar = null;
                 }
             } else if (mSnackbar == null) {
-                mSnackbar = Snackbar.make(mFrameLayout, R.string.disconnected,
+                mSnackbar = Snackbar.make(mContentView, R.string.disconnected,
                         Snackbar.LENGTH_INDEFINITE);
                 mSnackbar.show();
             }
