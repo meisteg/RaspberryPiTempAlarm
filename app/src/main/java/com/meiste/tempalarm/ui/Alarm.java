@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,8 @@ public class Alarm extends AppCompatActivity {
 
     private boolean mPlaying = false;
     private Vibrator mVibrator;
-    private MediaPlayer mMediaPlayer;
+
+    MediaPlayer mMediaPlayer;
 
     private static final int KILLER = 1000;
     private Handler mHandler = new Handler(new Handler.Callback() {

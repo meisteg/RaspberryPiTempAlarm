@@ -44,7 +44,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class CurrentTemp extends AppCompatActivity {
+public class CurrentTemp extends AppCompatActivity implements ValueEventListener {
 
     private static final int GPS_REQUEST = 1337;
 
@@ -82,7 +82,7 @@ public class CurrentTemp extends AppCompatActivity {
 
         Firebase.goOnline();
         mFirebase = new Firebase(AppConstants.FIREBASE_URL_CONNECTED);
-        mFirebase.addValueEventListener(mValueEventListener);
+        mFirebase.addValueEventListener(this);
 
         if (checkPlayServices()) {
             // Start RegistrationService to register this application with GCM.
@@ -115,7 +115,7 @@ public class CurrentTemp extends AppCompatActivity {
         super.onPause();
         mAdapter.stopSync();
 
-        mFirebase.removeEventListener(mValueEventListener);
+        mFirebase.removeEventListener(this);
         mFirebase = null;
 
         /*
@@ -171,27 +171,25 @@ public class CurrentTemp extends AppCompatActivity {
         return true;
     }
 
-    private final ValueEventListener mValueEventListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(final DataSnapshot snapshot) {
-            final boolean connected = snapshot.getValue(Boolean.class);
-            Timber.d("Firebase %sconnected", connected ? "" : "dis");
+    @Override
+    public void onDataChange(final DataSnapshot snapshot) {
+        final boolean connected = snapshot.getValue(Boolean.class);
+        Timber.d("Firebase %sconnected", connected ? "" : "dis");
 
-            if (connected) {
-                if (mSnackbar != null) {
-                    mSnackbar.dismiss();
-                    mSnackbar = null;
-                }
-            } else if (mSnackbar == null) {
-                mSnackbar = Snackbar.make(mContentView, R.string.disconnected,
-                        Snackbar.LENGTH_INDEFINITE);
-                mSnackbar.show();
+        if (connected) {
+            if (mSnackbar != null) {
+                mSnackbar.dismiss();
+                mSnackbar = null;
             }
+        } else if (mSnackbar == null) {
+            mSnackbar = Snackbar.make(mContentView, R.string.disconnected,
+                    Snackbar.LENGTH_INDEFINITE);
+            mSnackbar.show();
         }
+    }
 
-        @Override
-        public void onCancelled(final FirebaseError error) {
-            Timber.e("Connected listener was cancelled");
-        }
-    };
+    @Override
+    public void onCancelled(final FirebaseError error) {
+        Timber.e("Connected listener was cancelled");
+    }
 }

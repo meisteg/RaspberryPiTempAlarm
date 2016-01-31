@@ -55,13 +55,15 @@ import static com.meiste.tempalarm.AppConstants.PREF_NUM_RECORDS;
 public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final LineGraphView mGraph;
-    private final Context mContext;
-    private final List<SensorData> mListData = new ArrayList<>();
-    private final List<GraphView.GraphViewData> mGraphData = new ArrayList<>();
-    private final View mLoadingView;
+
+    final Context mContext;
+    final List<SensorData> mListData = new ArrayList<>();
+    final List<GraphView.GraphViewData> mGraphData = new ArrayList<>();
+    final View mLoadingView;
 
     private Query mFirebaseQuery;
-    private boolean mFirebaseAllowChild;
+
+    boolean mFirebaseAllowChild;
 
     public static class HeaderViewHolder extends RecyclerView.ViewHolder {
         public HeaderViewHolder(final View v, final LineGraphView lgv) {
@@ -192,12 +194,12 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return position == 0;
     }
 
-    private void addSensorData(final SensorData sensorData) {
+    void addSensorData(final SensorData sensorData) {
         mListData.add(0, sensorData);
         mGraphData.add(new GraphView.GraphViewData(sensorData.timestamp, sensorData.degF));
     }
 
-    private void updateGraph() {
+    void updateGraph() {
         final GraphViewSeries temperatureSeries = new GraphViewSeries(
                 mGraphData.toArray(new GraphView.GraphViewData[mGraphData.size()]));
         mGraph.removeAllSeries();
