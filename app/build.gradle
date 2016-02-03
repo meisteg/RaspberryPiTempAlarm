@@ -68,10 +68,14 @@ android {
     }
 }
 
+ext {
+    supportLibVersion = '23.1.1'
+}
+
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile "com.android.support:appcompat-v7:$supportLibVersion"
+    compile "com.android.support:design:$supportLibVersion"
+    compile "com.android.support:recyclerview-v7:$supportLibVersion"
     compile 'com.firebase:firebase-client-android:2.5.0'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
     compile 'com.jakewharton.timber:timber:4.1.0'
