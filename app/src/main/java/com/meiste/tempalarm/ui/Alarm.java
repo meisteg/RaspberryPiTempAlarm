@@ -26,6 +26,7 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.format.DateUtils;
 import android.view.MenuItem;
@@ -78,7 +79,10 @@ public class Alarm extends AppCompatActivity {
         setContentView(R.layout.alarm);
         ButterKnife.bind(this);
 
-        getSupportActionBar().setElevation(0);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setElevation(0);
+        }
     }
 
     @Override
