@@ -35,6 +35,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.meiste.tempalarm.AppConstants;
+import com.meiste.tempalarm.BuildConfig;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.adapters.SensorAdapter;
 import com.meiste.tempalarm.gcm.RegistrationService;
@@ -96,6 +97,12 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
+
+        if (BuildConfig.DEBUG) {
+            menu.add(Menu.NONE, R.string.action_alarm, Menu.NONE, R.string.action_alarm)
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        }
+
         return true;
     }
 
@@ -104,6 +111,9 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
         switch (item.getItemId()) {
             case R.id.action_settings:
                 startActivity(new Intent(this, Settings.class));
+                return true;
+            case R.string.action_alarm:
+                startActivity(new Intent(this, Alarm.class));
                 return true;
         }
 

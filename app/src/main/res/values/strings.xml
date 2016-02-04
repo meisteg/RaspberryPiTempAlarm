@@ -19,6 +19,7 @@
 
     <string name="app_name">Shop Temp Alarm</string>
 
+    <string name="action_alarm">False Alarm</string>
     <string name="action_settings">Settings</string>
 
     <string name="disconnected">Disconnected</string>
