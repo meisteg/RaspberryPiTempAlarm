@@ -23,6 +23,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +55,9 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     private Firebase mFirebase;
     private Snackbar mSnackbar;
 
+    @Bind(R.id.toolbar)
+    protected Toolbar mToolbar;
+
     @Bind(R.id.temp_list)
     protected RecyclerView mRecyclerView;
 
@@ -68,6 +72,8 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.current_temp);
         ButterKnife.bind(this);
+
+        setSupportActionBar(mToolbar);
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
