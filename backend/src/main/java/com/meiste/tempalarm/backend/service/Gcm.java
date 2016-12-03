@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.meiste.tempalarm.backend;
+package com.meiste.tempalarm.backend.service;
 
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
+import com.meiste.tempalarm.backend.Constants;
+import com.meiste.tempalarm.backend.SettingUtils;
 
 import java.io.IOException;
 import java.util.logging.Logger;

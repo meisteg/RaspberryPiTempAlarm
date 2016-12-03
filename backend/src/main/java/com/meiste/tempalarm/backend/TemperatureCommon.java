@@ -17,6 +17,7 @@
 package com.meiste.tempalarm.backend;
 
 import com.meiste.tempalarm.backend.service.Firebase;
+import com.meiste.tempalarm.backend.service.Gcm;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
