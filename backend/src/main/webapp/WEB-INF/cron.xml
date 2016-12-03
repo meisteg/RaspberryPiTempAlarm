@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <cronentries>
     <cron>
-        <url>/tasks/cleanup</url>
-        <description>Weekly cleanup of old device registrations</description>
-        <schedule>every thursday 03:00</schedule>
-        <timezone>America/Chicago</timezone>
-    </cron>
-    <cron>
         <url>/tasks/cleanup_temp</url>
         <description>Periodic cleanup of temperature data</description>
         <schedule>every 12 hours</schedule>

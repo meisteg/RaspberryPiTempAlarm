@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class TemperatureCommon {
 
             // Only alarm if this is first reading below threshold
             if (prevTemp >= lowTempThreshold) {
-                Gcm.sendAlarm(Gcm.AlarmState.TEMP_TOO_LOW);
+                Gcm.sendLowTemp();
                 AlertEmail.sendLowTemp(record.getDegF());
             }
         }

@@ -20,10 +20,7 @@ import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.logging.Logger;
-
-import static com.meiste.tempalarm.backend.OfyService.ofy;
 
 public class Gcm {
 
@@ -31,70 +28,26 @@ public class Gcm {
 
     private static final String TOPIC_TEMP_LOW = "/topics/tempLow";
     private static final String COLLAPSE_KEY_ALARM = "alarm";
-    private static final String STATE_KEY = "state";
     private static final int NUM_RETRIES = 3;
     private static final int TTL_SECONDS = 600; // 10 minutes
 
-    public enum AlarmState {
-        TEMP_TOO_LOW, TEMP_NORMAL
-    }
-    public static void sendAlarm(final AlarmState state) throws IOException {
-        send(COLLAPSE_KEY_ALARM, state.name());  // old way
-        send();                                  // new way
+    public static void sendLowTemp() throws IOException {
+        send(TOPIC_TEMP_LOW);
     }
 
-    public static void send() throws IOException {
+    private static void send(final String topic) throws IOException {
         final Sender sender = new Sender(getApiKey());
         final Message msg = new Message.Builder()
                 .collapseKey(COLLAPSE_KEY_ALARM)
                 .priority(Message.Priority.HIGH)
                 .timeToLive(TTL_SECONDS)
                 .build();
-        final Result result = sender.send(msg, TOPIC_TEMP_LOW, NUM_RETRIES);
+        final Result result = sender.send(msg, topic, NUM_RETRIES);
         if (result.getMessageId() != null) {
-            log.fine("Message sent to " + TOPIC_TEMP_LOW);
+            log.fine("Message sent to " + topic);
         } else {
             log.warning("Error when sending message: " + result.getErrorCodeName());
         }
-    }
-
-    private static void send(final String key, final String state) throws IOException {
-        final Sender sender = new Sender(getApiKey());
-        final Message msg = new Message.Builder().collapseKey(key).addData(STATE_KEY, state).build();
-        final List<RegistrationRecord> records = ofy().load().type(RegistrationRecord.class).list();
-        for (final RegistrationRecord record : records) {
-            final Result result = sender.send(msg, record.getRegId(), NUM_RETRIES);
-            if (result.getMessageId() != null) {
-                log.fine("Message sent to " + record.getRegId());
-                final String canonicalRegId = result.getCanonicalRegistrationId();
-                if (canonicalRegId != null) {
-                    // if the regId changed, we have to update the datastore
-                    log.info("Registration Id changed for " + record.getRegId() +
-                            " updating to " + canonicalRegId);
-                    if (findRecord(canonicalRegId) == null) {
-                        record.setRegId(canonicalRegId);
-                        ofy().save().entity(record).now();
-                    } else {
-                        // Device already told us new regId, so simply delete the old one
-                        ofy().delete().entity(record).now();
-                    }
-                }
-            } else {
-                final String error = result.getErrorCodeName();
-                if (error.equals(com.google.android.gcm.server.Constants.ERROR_NOT_REGISTERED)) {
-                    log.warning("Registration Id " + record.getRegId() +
-                            " no longer registered with GCM, removing from datastore");
-                    // if the device is no longer registered with GCM, remove it from the datastore
-                    ofy().delete().entity(record).now();
-                } else {
-                    log.warning("Error when sending message : " + error);
-                }
-            }
-        }
-    }
-
-    public static RegistrationRecord findRecord(final String regId) {
-        return ofy().load().type(RegistrationRecord.class).filter("regId", regId).first().now();
     }
 
     private static String getApiKey() {
