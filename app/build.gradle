@@ -28,8 +28,8 @@ android {
         applicationId "com.meiste.tempalarm"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 201
-        versionName "2.0.1-" + gitSha
+        versionCode 202
+        versionName "2.0.2-" + gitSha
     }
 
     compileOptions {
