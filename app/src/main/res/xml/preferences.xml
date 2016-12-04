@@ -27,7 +27,6 @@
         <ListPreference
             android:key="num_records_to_display"
             android:title="@string/pref_title_num_records"
-            android:summary="@string/pref_summary_num_records"
             android:persistent="false"
             android:entries="@array/pref_num_records_entries"
             android:entryValues="@array/pref_num_records_values" />

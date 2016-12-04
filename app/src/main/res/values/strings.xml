@@ -39,7 +39,10 @@
     <string name="pref_title_num_records">Sensor Readings</string>
 
     <string name="pref_summary_notifications">Show low temperature alerts</string>
-    <string name="pref_summary_num_records">Show %1$d readings on graph</string>
+    <plurals name="pref_summary_num_records">
+        <item quantity="one">Show %1$d reading on graph</item>
+        <item quantity="other">Show %1$d readings on graph</item>
+    </plurals>
 
     <string name="title_activity_settings">Settings</string>
     

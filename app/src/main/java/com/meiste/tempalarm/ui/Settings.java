@@ -16,8 +16,8 @@
 package com.meiste.tempalarm.ui;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -94,8 +94,9 @@ public class Settings extends AppCompatActivity {
         }
 
         private void setRecordsPrefSummary(final int value) {
-            final Context context = mNumRecordsPref.getContext();
-            mNumRecordsPref.setSummary(context.getString(R.string.pref_summary_num_records, value));
+            final Resources res = mNumRecordsPref.getContext().getResources();
+            mNumRecordsPref.setSummary(res.getQuantityString(
+                    R.plurals.pref_summary_num_records, value, value));
         }
     }
 }
