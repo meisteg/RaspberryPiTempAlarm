@@ -28,7 +28,7 @@
     <string name="header_degrees">Degrees</string>
     <string name="header_humidity">Humidity</string>
 
-    <string name="alarm_low_temp">Low temperature detected!</string>
+    <string name="alarm_temp_out_range">Temperature is out of range!</string>
     <string name="alarm_dismiss">Dismiss</string>
 
     <string name="pref_header_about">About</string>
@@ -38,7 +38,7 @@
     <string name="pref_title_notifications">Notifications</string>
     <string name="pref_title_num_records">Sensor Readings</string>
 
-    <string name="pref_summary_notifications">Show low temperature alerts</string>
+    <string name="pref_summary_notifications">Show temperature out of range alerts</string>
     <plurals name="pref_summary_num_records">
         <item quantity="one">Show %1$d reading on graph</item>
         <item quantity="other">Show %1$d readings on graph</item>

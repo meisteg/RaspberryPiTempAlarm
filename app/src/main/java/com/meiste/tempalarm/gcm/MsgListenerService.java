@@ -60,7 +60,7 @@ public class MsgListenerService extends GcmListenerService {
         final PendingIntent pi = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        final String notifyText = getString(R.string.alarm_low_temp);
+        final String notifyText = getString(R.string.alarm_temp_out_range);
         final Notification notification = new NotificationCompat.Builder(this)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(android.R.drawable.stat_sys_warning)
