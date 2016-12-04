@@ -38,17 +38,23 @@ public class TemperatureCommon {
 
         final float lowTempThreshold = getLowTempThreshold();
         if (temperature < lowTempThreshold) {
-            log.warning("Reported temperature is below threshold!");
+            log.warning("Reported temperature is below low threshold!");
 
-            // Retrieve previous reported temperature from datastore
-            final TemperatureRecord prevRecord = ofy().load().type(TemperatureRecord.class)
-                    .order("-timestamp").limit(1).first().now();
-            final float prevTemp = (prevRecord != null) ? prevRecord.getFloatDegF() : Float.NaN;
-
-            // Only alarm if this is first reading below threshold
-            if (prevTemp >= lowTempThreshold) {
+            // Only alarm if this is first reading below low threshold
+            if (getPrevTemp() >= lowTempThreshold) {
                 Gcm.sendLowTemp();
                 AlertEmail.sendLowTemp(record.getDegF());
+            }
+        } else {
+            final float highTempThreshold = getHighTempThreshold();
+            if (temperature > highTempThreshold) {
+                log.warning("Reported temperature is above high threshold!");
+
+                // Only alarm if this is first reading above high threshold
+                if (getPrevTemp() <= highTempThreshold) {
+                    Gcm.sendHighTemp();
+                    AlertEmail.sendHighTemp(record.getDegF());
+                }
             }
         }
 
@@ -69,8 +75,21 @@ public class TemperatureCommon {
         }
     }
 
+    @SuppressWarnings("WeakerAccess") // Used in JSP code
     public static float getLowTempThreshold() {
         return Float.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_LOW,
                 Constants.DEFAULT_THRES_LOW));
+    }
+
+    @SuppressWarnings("WeakerAccess") // Used in JSP code
+    public static float getHighTempThreshold() {
+        return Float.valueOf(SettingUtils.getSettingValue(Constants.SETTING_THRES_HIGH,
+                Constants.DEFAULT_THRES_HIGH));
+    }
+
+    private static float getPrevTemp() {
+        final TemperatureRecord prevRecord = ofy().load().type(TemperatureRecord.class)
+                .order("-timestamp").limit(1).first().now();
+        return (prevRecord != null) ? prevRecord.getFloatDegF() : Float.NaN;
     }
 }

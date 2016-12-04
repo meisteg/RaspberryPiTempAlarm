@@ -4,11 +4,17 @@
 
 <%
     String lowThres = request.getParameter("lowThres");
-    if (lowThres != null) {
-        /* Normalize the submitted value */
+    String highThres = request.getParameter("highThres");
+    if ((lowThres != null) && (highThres != null)) {
+        /* Normalize the submitted values */
         lowThres = String.format("%.1f", Float.parseFloat(lowThres));
+        highThres = String.format("%.1f", Float.parseFloat(highThres));
 
-        SettingUtils.setValue(Constants.SETTING_THRES_LOW, lowThres);
+        if (Float.parseFloat(lowThres) < Float.parseFloat(highThres)) {
+            SettingUtils.setValue(Constants.SETTING_THRES_LOW, lowThres);
+            SettingUtils.setValue(Constants.SETTING_THRES_HIGH, highThres);
+        }
+
         response.sendRedirect("index.jsp");
     }
 %>
@@ -25,11 +31,15 @@
     <div class="jumbotron">
         <div class="row">
             <div class="col-lg-12" style="text-align: center;">
-                <h3>Set new alarm threshold</h3>
+                <h3>Set new alarm thresholds</h3>
                 <form id="edit_alarm" method="post">
-                    <input type="number" name="lowThres" min="32.0" max="90.0" step="0.5"
+                    <label for="lowThres">Low</label>
+                    <input type="number" id="lowThres" name="lowThres" min="32.0" max="90.0" step="0.5"
                         value="<%= TemperatureCommon.getLowTempThreshold() %>">
-
+                    <label for="highThres">High</label>
+                    <input type="number" id="highThres" name="highThres" min="50.0" max="100.0" step="0.5"
+                        value="<%= TemperatureCommon.getHighTempThreshold() %>">
+                    <br /><br />
                     <input type="submit">
                 </form>
             </div>

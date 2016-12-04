@@ -30,7 +30,12 @@
 <%
                 }
 %>
-                <p>Alarm set to <a href="alarm.jsp"><%= TemperatureCommon.getLowTempThreshold() %>&deg;F</a></p>
+                <p>
+                    Low Temperature Alarm set to <a href="alarm.jsp">
+                        <%= TemperatureCommon.getLowTempThreshold() %>&deg;F</a><br />
+                    High Temperature Alarm set to <a href="alarm.jsp">
+                        <%= TemperatureCommon.getHighTempThreshold() %>&deg;F</a>
+                </p>
             </div>
         </div>
     </div>

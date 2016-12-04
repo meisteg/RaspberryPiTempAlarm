@@ -37,6 +37,15 @@ public class Gcm {
         send(TOPIC_TEMP_LOW);
     }
 
+    public static void sendHighTemp() throws IOException {
+        /*
+         * For now, just send the low temp broadcast. There really isn't any
+         * reason to send separate events as both result in the same action
+         * on the phone side.
+         */
+        sendLowTemp();
+    }
+
     private static void send(final String topic) throws IOException {
         final Sender sender = new Sender(getApiKey());
         final Message msg = new Message.Builder()

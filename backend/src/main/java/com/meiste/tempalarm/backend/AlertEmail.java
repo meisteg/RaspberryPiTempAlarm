@@ -31,21 +31,27 @@ public class AlertEmail {
 
     private static final Logger log = Logger.getLogger(AlertEmail.class.getSimpleName());
 
+    private static final String SUBJECT_HIGH_TEMP = "URGENT: High temperature detected!";
     private static final String SUBJECT_LOW_TEMP = "URGENT: Low temperature detected!";
     private static final String BODY_TEMP_TEMPLATE = "Temperature is %s degrees.";
     private static final String FOOTER = "\n\nhttp://rasptempalarm.appspot.com";
 
     public static boolean sendLowTemp(final String temp) {
-        return send(SUBJECT_LOW_TEMP, String.format(BODY_TEMP_TEMPLATE, temp));
+        return send(SUBJECT_LOW_TEMP, temp);
     }
 
-    private static boolean send(final String subject, final String body) {
+    public static boolean sendHighTemp(final String temp) {
+        return send(SUBJECT_HIGH_TEMP, temp);
+    }
+
+    private static boolean send(final String subject, final String temp) {
         final InternetAddress[] recipients = getRecipients();
         if (recipients.length == 0) {
             log.warning("No recipients specified.");
             return false;
         }
 
+        final String body = String.format(BODY_TEMP_TEMPLATE, temp);
         final Properties props = new Properties();
         final Session session = Session.getDefaultInstance(props, null);
         final Message msg = new MimeMessage(session);
