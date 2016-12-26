@@ -70,6 +70,7 @@ public class MsgListenerService extends GcmListenerService {
                 .setContentText(notifyText)
                 .setContentIntent(pi)
                 .setAutoCancel(true)
+                .setShowWhen(true)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)
                 .build();
 
