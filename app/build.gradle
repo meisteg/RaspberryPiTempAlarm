@@ -81,7 +81,7 @@ dependencies {
     compile "com.google.android.gms:play-services-base:$googleFirebaseVersion"
     compile "com.google.firebase:firebase-database:$googleFirebaseVersion"
     compile "com.google.firebase:firebase-messaging:$googleFirebaseVersion"
-    compile 'com.jakewharton.timber:timber:4.1.2'
+    compile 'com.jakewharton.timber:timber:4.4.0'
     compile "com.jakewharton:butterknife:$butterKnifeVersion"
     annotationProcessor "com.jakewharton:butterknife-compiler:$butterKnifeVersion"
     compile 'com.jjoe64:graphview:3.1.4'
