@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.meiste.tempalarm.gcm;
+package com.meiste.tempalarm.fcm;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -22,12 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 
-import com.google.android.gms.gcm.GcmListenerService;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.ui.Alarm;
@@ -35,11 +35,11 @@ import com.meiste.tempalarm.ui.CurrentTemp;
 
 import timber.log.Timber;
 
-public class MsgListenerService extends GcmListenerService {
+public class MsgListenerService extends FirebaseMessagingService {
 
     @Override
-    public void onMessageReceived(final String from, final Bundle data) {
-        Timber.d("Received message from GCM");
+    public void onMessageReceived(RemoteMessage remoteMessage) {
+        Timber.d("Received FCM message from %s", remoteMessage.getFrom());
 
         // Only show notification if the user wants notifications
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

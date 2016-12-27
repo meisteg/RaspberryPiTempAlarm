@@ -70,6 +70,7 @@ android {
 
 ext {
     supportLibVersion = '25.1.0'
+    googleFirebaseVersion = '10.0.1'
 }
 
 dependencies {
@@ -77,7 +78,8 @@ dependencies {
     compile "com.android.support:design:$supportLibVersion"
     compile "com.android.support:recyclerview-v7:$supportLibVersion"
     compile 'com.firebase:firebase-client-android:2.5.0'
-    compile 'com.google.android.gms:play-services-gcm:10.0.1'
+    compile "com.google.android.gms:play-services-base:$googleFirebaseVersion"
+    compile "com.google.firebase:firebase-messaging:$googleFirebaseVersion"
     compile 'com.jakewharton.timber:timber:4.1.2'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.jjoe64:graphview:3.1.4'

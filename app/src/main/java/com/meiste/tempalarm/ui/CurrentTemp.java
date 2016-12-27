@@ -39,7 +39,7 @@ import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.BuildConfig;
 import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.adapters.SensorAdapter;
-import com.meiste.tempalarm.gcm.RegistrationService;
+import com.meiste.tempalarm.fcm.IIDListenerService;
 import com.meiste.tempalarm.util.DividerItemDecoration;
 
 import butterknife.Bind;
@@ -92,10 +92,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
         mFirebase.addValueEventListener(this);
 
         if (checkPlayServices()) {
-            // Start RegistrationService to register this application with GCM.
-            final Intent intent = new Intent(this, RegistrationService.class);
-            startService(intent);
-
+            IIDListenerService.subscribeToTopics();
             mAdapter.startSync();
         }
     }
