@@ -39,13 +39,19 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".fcm.MsgListenerService">
+        <service
+            android:name=".fcm.MsgListenerService"
+            tools:ignore="ExportedService" >
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
-        <service android:name=".fcm.IIDListenerService">
+        <!-- FirebaseInstanceIdService performs security checks at runtime,
+             no need for explicit permissions despite exported="true".      -->
+        <service
+            android:name=".fcm.IIDListenerService"
+            tools:ignore="ExportedService" >
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
