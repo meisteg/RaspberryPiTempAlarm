@@ -77,8 +77,8 @@ dependencies {
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     compile "com.android.support:design:$supportLibVersion"
     compile "com.android.support:recyclerview-v7:$supportLibVersion"
-    compile 'com.firebase:firebase-client-android:2.5.0'
     compile "com.google.android.gms:play-services-base:$googleFirebaseVersion"
+    compile "com.google.firebase:firebase-database:$googleFirebaseVersion"
     compile "com.google.firebase:firebase-messaging:$googleFirebaseVersion"
     compile 'com.jakewharton.timber:timber:4.1.2'
     compile 'com.jakewharton:butterknife:7.0.1'

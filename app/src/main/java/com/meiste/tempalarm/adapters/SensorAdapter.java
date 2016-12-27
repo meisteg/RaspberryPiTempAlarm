@@ -27,12 +27,12 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.jjoe64.graphview.CustomLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -56,13 +56,21 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private final LineGraphView mGraph;
 
+    @SuppressWarnings("WeakerAccess")
     final Context mContext;
+
+    @SuppressWarnings("WeakerAccess")
     final List<SensorData> mListData = new ArrayList<>();
+
+    @SuppressWarnings("WeakerAccess")
     final List<GraphView.GraphViewData> mGraphData = new ArrayList<>();
+
+    @SuppressWarnings("WeakerAccess")
     final View mLoadingView;
 
     private Query mFirebaseQuery;
 
+    @SuppressWarnings("WeakerAccess")
     boolean mFirebaseAllowChild;
 
     public static class HeaderViewHolder extends RecyclerView.ViewHolder {
@@ -125,7 +133,8 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
             final SharedPreferences prefs =
                     PreferenceManager.getDefaultSharedPreferences(mContext);
-            mFirebaseQuery = new Firebase(AppConstants.FIREBASE_URL_SENSOR)
+            mFirebaseQuery = FirebaseDatabase.getInstance()
+                    .getReferenceFromUrl(AppConstants.FIREBASE_URL_SENSOR)
                     .orderByChild("timestamp")
                     .limitToLast(prefs.getInt(PREF_NUM_RECORDS, DEFAULT_NUM_RECORDS));
             mFirebaseQuery.addChildEventListener(mChildEventListener);
@@ -194,11 +203,13 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return position == 0;
     }
 
+    @SuppressWarnings("WeakerAccess")
     void addSensorData(final SensorData sensorData) {
         mListData.add(0, sensorData);
         mGraphData.add(new GraphView.GraphViewData(sensorData.timestamp, sensorData.degF));
     }
 
+    @SuppressWarnings("WeakerAccess")
     void updateGraph() {
         final GraphViewSeries temperatureSeries = new GraphViewSeries(
                 mGraphData.toArray(new GraphView.GraphViewData[mGraphData.size()]));
@@ -254,7 +265,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public void onCancelled(final FirebaseError error) {
+        public void onCancelled(final DatabaseError error) {
             Timber.e("Firebase ChildEventListener onCancelled");
         }
     };
@@ -287,7 +298,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
 
         @Override
-        public void onCancelled(final FirebaseError error) {
+        public void onCancelled(final DatabaseError error) {
             Timber.e("Firebase ValueEventListener onCancelled");
         }
     };

@@ -29,12 +29,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.meiste.tempalarm.AppConstants;
 import com.meiste.tempalarm.BuildConfig;
 import com.meiste.tempalarm.R;
@@ -52,7 +53,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
 
     private Dialog mDialog;
     private SensorAdapter mAdapter;
-    private Firebase mFirebase;
+    private DatabaseReference mFirebase;
     private Snackbar mSnackbar;
 
     @Bind(R.id.toolbar)
@@ -87,12 +88,15 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     protected void onResume() {
         super.onResume();
 
-        Firebase.goOnline();
-        mFirebase = new Firebase(AppConstants.FIREBASE_URL_CONNECTED);
-        mFirebase.addValueEventListener(this);
+        DatabaseReference.goOnline();
 
         if (checkPlayServices()) {
+            mFirebase = FirebaseDatabase.getInstance()
+                    .getReferenceFromUrl(AppConstants.FIREBASE_URL_CONNECTED);
+            mFirebase.addValueEventListener(this);
+
             IIDListenerService.subscribeToTopics();
+
             mAdapter.startSync();
         }
     }
@@ -128,8 +132,10 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
         super.onPause();
         mAdapter.stopSync();
 
-        mFirebase.removeEventListener(this);
-        mFirebase = null;
+        if (mFirebase != null) {
+            mFirebase.removeEventListener(this);
+            mFirebase = null;
+        }
 
         /*
          * On a device rotation, there is no point disconnecting from Firebase
@@ -137,7 +143,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
          */
         if (!isChangingConfigurations()) {
             Timber.v("Forcing Firebase offline");
-            Firebase.goOffline();
+            DatabaseReference.goOffline();
         }
     }
 
@@ -202,7 +208,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     }
 
     @Override
-    public void onCancelled(final FirebaseError error) {
+    public void onCancelled(final DatabaseError error) {
         Timber.e("Connected listener was cancelled");
     }
 }

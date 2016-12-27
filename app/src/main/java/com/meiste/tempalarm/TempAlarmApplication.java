@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package com.meiste.tempalarm;
 import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
-import com.firebase.client.Firebase;
+import com.google.firebase.database.FirebaseDatabase;
 
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
@@ -39,8 +39,7 @@ public class TempAlarmApplication extends Application {
             Timber.plant(new CrashlyticsTree());
         }
 
-        Firebase.setAndroidContext(this);
-        Firebase.getDefaultConfig().setPersistenceEnabled(true);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         Timber.v("Application created");
     }
