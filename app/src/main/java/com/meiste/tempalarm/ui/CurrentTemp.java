@@ -43,7 +43,7 @@ import com.meiste.tempalarm.adapters.SensorAdapter;
 import com.meiste.tempalarm.fcm.IIDListenerService;
 import com.meiste.tempalarm.util.DividerItemDecoration;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
@@ -56,17 +56,17 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     private DatabaseReference mFirebase;
     private Snackbar mSnackbar;
 
-    @Bind(R.id.toolbar)
-    protected Toolbar mToolbar;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
 
-    @Bind(R.id.temp_list)
-    protected RecyclerView mRecyclerView;
+    @BindView(R.id.temp_list)
+    RecyclerView mRecyclerView;
 
-    @Bind(android.R.id.content)
-    protected View mContentView;
+    @BindView(android.R.id.content)
+    View mContentView;
 
-    @Bind(R.id.progress)
-    protected ProgressBar mProgressBar;
+    @BindView(R.id.progress)
+    ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

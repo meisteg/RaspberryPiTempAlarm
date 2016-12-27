@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
@@ -73,7 +73,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @SuppressWarnings("WeakerAccess")
     boolean mFirebaseAllowChild;
 
-    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
+    private static class HeaderViewHolder extends RecyclerView.ViewHolder {
         public HeaderViewHolder(final View v, final LineGraphView lgv) {
             super(v);
 
@@ -82,16 +82,16 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
-    public static class RecordViewHolder extends RecyclerView.ViewHolder {
+    static class RecordViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.timestamp)
-        public TextView timestamp;
+        @BindView(R.id.timestamp)
+        TextView timestamp;
 
-        @Bind(R.id.degF)
-        public TextView degF;
+        @BindView(R.id.degF)
+        TextView degF;
 
-        @Bind(R.id.humidity)
-        public TextView humidity;
+        @BindView(R.id.humidity)
+        TextView humidity;
 
         public RecordViewHolder(final View v) {
             super(v);
