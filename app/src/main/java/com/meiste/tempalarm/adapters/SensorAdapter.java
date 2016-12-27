@@ -204,9 +204,16 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     @SuppressWarnings("WeakerAccess")
-    void addSensorData(final SensorData sensorData) {
-        mListData.add(0, sensorData);
-        mGraphData.add(new GraphView.GraphViewData(sensorData.timestamp, sensorData.degF));
+    boolean addSensorData(final SensorData sensorData) {
+        if (mListData.isEmpty() || (sensorData.timestamp > mListData.get(0).timestamp)) {
+            mListData.add(0, sensorData);
+            mGraphData.add(new GraphView.GraphViewData(sensorData.timestamp, sensorData.degF));
+
+            return true;
+        }
+
+        Timber.e("addSensorData: time %d < %d", sensorData.timestamp, mListData.get(0).timestamp);
+        return false;
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -224,9 +231,10 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 final SensorData sensorData = snapshot.getValue(SensorData.class);
                 Timber.v("onChildAdded:   %s", sensorData.toString());
 
-                addSensorData(sensorData);
-                notifyItemInserted(1);
-                updateGraph();
+                if (addSensorData(sensorData)) {
+                    notifyItemInserted(1);
+                    updateGraph();
+                }
             }
         }
 
