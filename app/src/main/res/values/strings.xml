@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     Copyright (C) 2014-2016 Gregory S. Meiste <http://gregmeiste.com>
+     Copyright (C) 2014-2017 Gregory S. Meiste <http://gregmeiste.com>
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_build">Build</string>
+    <string name="pref_title_night_mode">Night Mode</string>
     <string name="pref_title_notifications">Notifications</string>
     <string name="pref_title_num_records">Sensor Readings</string>
 
@@ -45,7 +46,19 @@
     </plurals>
 
     <string name="title_activity_settings">Settings</string>
-    
+
+    <string-array name="pref_night_mode_entries">
+        <item>Disabled</item>
+        <item>Automatic</item>
+        <item>Enabled</item>
+    </string-array>
+
+    <string-array name="pref_night_mode_values" translatable="false">
+        <item>1</item>
+        <item>0</item>
+        <item>2</item>
+    </string-array>
+
     <string-array name="pref_num_records_entries">
         <item>60 readings</item>
         <item>120 readings</item>

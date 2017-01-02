@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.meiste.tempalarm.ui;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -55,6 +56,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     private SensorAdapter mAdapter;
     private DatabaseReference mFirebase;
     private Snackbar mSnackbar;
+    private int mNightMode;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -82,11 +84,22 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
 
         mAdapter = new SensorAdapter(this, mProgressBar);
         mRecyclerView.setAdapter(mAdapter);
+
+        mNightMode = getResources().getConfiguration().uiMode &
+                Configuration.UI_MODE_NIGHT_MASK;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        /* Check if activity needs to be recreated to get night mode change */
+        final int currentNightMode = getResources().getConfiguration().uiMode &
+                Configuration.UI_MODE_NIGHT_MASK;
+        if (currentNightMode != mNightMode) {
+            Timber.d("currentNightMode(%d) != mNightMode(%d)", currentNightMode, mNightMode);
+            recreate();
+        }
 
         DatabaseReference.goOnline();
 

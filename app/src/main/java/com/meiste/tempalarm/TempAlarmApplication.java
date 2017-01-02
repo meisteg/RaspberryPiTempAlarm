@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,18 @@
 package com.meiste.tempalarm;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatDelegate;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
 
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
+
+import static com.meiste.tempalarm.AppConstants.DEFAULT_NIGHT_MODE;
+import static com.meiste.tempalarm.AppConstants.PREF_NIGHT_MODE;
 
 public class TempAlarmApplication extends Application {
 
@@ -40,7 +46,16 @@ public class TempAlarmApplication extends Application {
         }
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        setDefaultNightMode();
 
         Timber.v("Application created");
+    }
+
+    @SuppressWarnings("WrongConstant")
+    private void setDefaultNightMode() {
+        final SharedPreferences prefs =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        final int value = Integer.valueOf(prefs.getString(PREF_NIGHT_MODE, DEFAULT_NIGHT_MODE));
+        AppCompatDelegate.setDefaultNightMode(value);
     }
 }

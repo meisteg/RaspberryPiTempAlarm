@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,21 @@
  */
 package com.meiste.tempalarm.ui;
 
+import android.Manifest;
 import android.app.Fragment;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 
 import com.meiste.tempalarm.BuildConfig;
 import com.meiste.tempalarm.R;
@@ -31,6 +37,7 @@ import com.meiste.tempalarm.R;
 import timber.log.Timber;
 
 import static com.meiste.tempalarm.AppConstants.DEFAULT_NUM_RECORDS;
+import static com.meiste.tempalarm.AppConstants.PREF_NIGHT_MODE;
 import static com.meiste.tempalarm.AppConstants.PREF_NUM_RECORDS;
 
 public class Settings extends AppCompatActivity {
@@ -46,12 +53,28 @@ public class Settings extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        /* If request is cancelled, the result arrays are empty. */
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Timber.v("Permission granted to ACCESS_COARSE_LOCATION");
+        } else {
+            Timber.e("Permission denied to ACCESS_COARSE_LOCATION");
+            /*
+             * This is okay because the Twilight Manager will fall back to
+             * hardcoded sunrise/sunset values.
+             */
+        }
+    }
+
     public static class SettingsFragment extends PreferenceFragment implements
-            Preference.OnPreferenceChangeListener {
+            Preference.OnPreferenceChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
         private static final String KEY_BUILD = "build";
         private static final String KEY_NUM_RECORDS = "num_records_to_display";
 
+        private ListPreference mNightModePref;
         private ListPreference mNumRecordsPref;
 
         @Override
@@ -69,12 +92,31 @@ public class Settings extends AppCompatActivity {
             mNumRecordsPref.setValue(String.valueOf(numRecords));
             mNumRecordsPref.setOnPreferenceChangeListener(this);
             setRecordsPrefSummary(numRecords);
+
+            mNightModePref = (ListPreference) findPreference(PREF_NIGHT_MODE);
+            mNightModePref.setSummary(mNightModePref.getEntry());
+            prefs.registerOnSharedPreferenceChangeListener(this);
+
+            if ((Integer.valueOf(mNightModePref.getValue()) == AppCompatDelegate.MODE_NIGHT_AUTO) &&
+                    (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                            PackageManager.PERMISSION_GRANTED)) {
+                Timber.w("Location permission not granted. Requesting now...");
+
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
+            }
         }
 
         @Override
         public void onDestroy() {
-            super.onDestroy();
             Timber.v("onDestroy");
+
+            final SharedPreferences prefs =
+                    PreferenceManager.getDefaultSharedPreferences(getActivity());
+            prefs.unregisterOnSharedPreferenceChangeListener(this);
+
+            super.onDestroy();
         }
 
         @Override
@@ -91,6 +133,23 @@ public class Settings extends AppCompatActivity {
                 setRecordsPrefSummary(value);
             }
             return true;
+        }
+
+        @SuppressWarnings("WrongConstant")
+        @Override
+        public void onSharedPreferenceChanged(final SharedPreferences prefs, final String key) {
+            if (PREF_NIGHT_MODE.equals(key)) {
+                Timber.d("Night mode: %s", mNightModePref.getEntry());
+
+                final int value = Integer.valueOf(mNightModePref.getValue());
+                AppCompatDelegate.setDefaultNightMode(value);
+
+                /*
+                 * If the night mode is changed after any inflation, it will not
+                 * take effect. In this instance, recreate() must be called.
+                 */
+                getActivity().recreate();
+            }
         }
 
         private void setRecordsPrefSummary(final int value) {
