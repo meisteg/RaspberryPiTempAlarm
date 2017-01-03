@@ -23,7 +23,7 @@ public class AppConstants {
     public static final String FIREBASE_URL_CONNECTED = FIREBASE_URL_BASE + ".info/connected";
 
     public static final String PREF_NIGHT_MODE = "night_mode";
-    public static final String PREF_NOTIFICATIONS = "notifications_enabled";
+    public static final String PREF_ALARM_ENABLED = "notifications_enabled";
     public static final String PREF_NUM_RECORDS = "num_records";
 
     public static final String DEFAULT_NIGHT_MODE = "1";

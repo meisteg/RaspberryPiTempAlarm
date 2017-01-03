@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,17 +41,11 @@ public class MsgListenerService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Timber.d("Received FCM message from %s", remoteMessage.getFrom());
 
-        // Only show notification if the user wants notifications
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean(AppConstants.PREF_NOTIFICATIONS, true)) {
-            final TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-            final boolean inCall = tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
-
-            if (inCall) {
-                showNotification();
-            } else {
-                showAlarm();
-            }
+        /* Determine how user should be notified */
+        if (isAlarmEnabled() && !isInCall()) {
+            showAlarm();
+        } else {
+            showNotification();
         }
     }
 
@@ -83,5 +77,15 @@ public class MsgListenerService extends FirebaseMessagingService {
         final Intent intent = new Intent(this, Alarm.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+    }
+
+    private boolean isAlarmEnabled() {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        return prefs.getBoolean(AppConstants.PREF_ALARM_ENABLED, true);
+    }
+
+    private boolean isInCall() {
+        final TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        return tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
     }
 }

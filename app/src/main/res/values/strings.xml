@@ -36,10 +36,10 @@
 
     <string name="pref_title_build">Build</string>
     <string name="pref_title_night_mode">Night Mode</string>
-    <string name="pref_title_notifications">Notifications</string>
+    <string name="pref_title_alarms">Alarms</string>
     <string name="pref_title_num_records">Sensor Readings</string>
 
-    <string name="pref_summary_notifications">Show temperature out of range alerts</string>
+    <string name="pref_summary_alarms">Show temperature out of range alarms</string>
     <plurals name="pref_summary_num_records">
         <item quantity="one">Show %1$d reading on graph</item>
         <item quantity="other">Show %1$d readings on graph</item>
