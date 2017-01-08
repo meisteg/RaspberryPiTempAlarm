@@ -15,13 +15,23 @@
  */
 package com.meiste.tempalarm.ui;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -48,7 +58,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class CurrentTemp extends AppCompatActivity implements ValueEventListener {
+import static com.meiste.tempalarm.AppConstants.DEFAULT_NIGHT_MODE;
+import static com.meiste.tempalarm.AppConstants.PREF_NIGHT_MODE;
+
+public class CurrentTemp extends AppCompatActivity implements ValueEventListener, LocationListener {
 
     private static final int GPS_REQUEST = 1337;
 
@@ -87,6 +100,8 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
 
         mNightMode = getResources().getConfiguration().uiMode &
                 Configuration.UI_MODE_NIGHT_MASK;
+
+        getLocationIfNeeded();
     }
 
     @Override
@@ -224,4 +239,47 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     public void onCancelled(final DatabaseError error) {
         Timber.e("Connected listener was cancelled");
     }
+
+    /*
+     * Location is only needed if night mode is set to auto. This seems like it
+     * should be handled by the TwilightManager.
+     */
+    private void getLocationIfNeeded() {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final int value = Integer.valueOf(prefs.getString(PREF_NIGHT_MODE, DEFAULT_NIGHT_MODE));
+        if (value != AppCompatDelegate.MODE_NIGHT_AUTO) {
+            /* Night mode is not set to auto, so no need to get the location */
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED) {
+            /* No permission to get location */
+            return;
+        }
+
+        final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        final Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (location == null) {
+            Timber.d("Requesting location");
+            lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
+        } else {
+            /* TODO: Need to check if location is too old? */
+            Timber.v(location.toString());
+        }
+    }
+
+    @Override
+    public void onLocationChanged(final Location location) {
+        Timber.v(location.toString());
+    }
+
+    @Override
+    public void onStatusChanged(final String provider, final int status, final Bundle extras) {}
+
+    @Override
+    public void onProviderEnabled(final String provider) {}
+
+    @Override
+    public void onProviderDisabled(final String provider) {}
 }
