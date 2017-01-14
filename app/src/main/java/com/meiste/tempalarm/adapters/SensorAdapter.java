@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2015-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -104,10 +105,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mLoadingView = view;
 
         final Resources res = context.getResources();
-
-        // getColor(id) was replaced in API level 23 with getColor(id, theme)
-        //noinspection deprecation
-        final int bgColor = res.getColor(R.color.primary_graph);
+        final int bgColor = ContextCompat.getColor(mContext, R.color.primary_graph);
 
         mGraph = new LineGraphView(context, "");
         mGraph.setDrawBackground(true);
