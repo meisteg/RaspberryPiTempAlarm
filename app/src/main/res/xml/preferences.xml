@@ -35,7 +35,8 @@
             android:key="night_mode"
             android:title="@string/pref_title_night_mode"
             android:entries="@array/pref_night_mode_entries"
-            android:entryValues="@array/pref_night_mode_values" />
+            android:entryValues="@array/pref_night_mode_values"
+            android:defaultValue="1" />
 
     </PreferenceCategory>
 
