@@ -1,9 +1,9 @@
 # Temperature Alarm
 
 Temperature and humidity are reported to a [Google App Engine (GAE)][1]
-backend, which notifies [Android][2] devices via [Google Cloud Messaging][3]
-if the temperature crosses a defined threshold. The data reported from the
-sensor is stored on [Firebase][4], which allows for real time updates on
+backend, which notifies [Android][2] devices via [Firebase Cloud Messaging][3]
+if the temperature moves outside of the allowed range. The data reported from
+the sensor is stored on [Firebase][4], which allows for real time updates on
 devices.
 
 ## License
@@ -24,6 +24,6 @@ devices.
 
 
 [1]: https://cloud.google.com/appengine/
-[2]: http://www.android.com/
-[3]: https://developers.google.com/cloud-messaging/
-[4]: https://www.firebase.com/
+[2]: https://www.android.com/
+[3]: https://firebase.google.com/docs/cloud-messaging/
+[4]: https://firebase.google.com/
