@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ public class Gcm {
 
     private static final Logger log = Logger.getLogger(Gcm.class.getSimpleName());
 
+    private static final String TOPIC_DEBUG = "/topics/debug";
     private static final String TOPIC_TEMP_LOW = "/topics/tempLow";
     private static final String COLLAPSE_KEY_ALARM = "alarm";
     private static final int NUM_RETRIES = 3;
@@ -44,6 +45,10 @@ public class Gcm {
          * on the phone side.
          */
         sendLowTemp();
+    }
+
+    public static void sendDebugMsg() throws IOException {
+        send(TOPIC_DEBUG);
     }
 
     private static void send(final String topic) throws IOException {
