@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2015-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.meiste.tempalarm.fcm;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.meiste.tempalarm.BuildConfig;
 
 import timber.log.Timber;
 
@@ -38,5 +39,10 @@ public class IIDListenerService extends FirebaseInstanceIdService {
         Timber.d("FCM Registration Token: %s", token);
 
         FirebaseMessaging.getInstance().subscribeToTopic("tempLow");
+
+        if (BuildConfig.DEBUG) {
+            Timber.v("Also subscribing to FCM debug topic");
+            FirebaseMessaging.getInstance().subscribeToTopic("debug");
+        }
     }
 }
