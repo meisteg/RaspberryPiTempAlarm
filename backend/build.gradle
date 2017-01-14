@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.46'
+        classpath 'com.google.appengine:gradle-appengine-plugin:1.9.48'
     }
 }
 
@@ -23,8 +23,8 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 dependencies {
-    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.46'
-    compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.46'
+    appengineSdk 'com.google.appengine:appengine-java-sdk:1.9.48'
+    compile 'com.google.appengine:appengine-api-1.0-sdk:1.9.48'
     compile 'javax.servlet:servlet-api:2.5'
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
     compile 'com.googlecode.objectify:objectify:5.1.13'
