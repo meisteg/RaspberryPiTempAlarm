@@ -1,5 +1,7 @@
 # Temperature Alarm
 
+[![Build Status](https://travis-ci.org/meisteg/RaspberryPiTempAlarm.svg?branch=master)](https://travis-ci.org/meisteg/RaspberryPiTempAlarm)
+
 Temperature and humidity are reported to a [Google App Engine (GAE)][1]
 backend, which notifies [Android][2] devices via [Firebase Cloud Messaging][3]
 if the temperature moves outside of the allowed range. The data reported from
