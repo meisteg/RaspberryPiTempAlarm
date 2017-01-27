@@ -30,6 +30,8 @@ android {
         targetSdkVersion 25
         versionCode 210
         versionName "2.1.0-" + gitSha
+
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     compileOptions {
@@ -88,6 +90,8 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
     }
+
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
 }
 
 // get signing config from gradle.properties file
