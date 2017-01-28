@@ -20,6 +20,7 @@ sudo: false
 env:
   global:
     - ADB_INSTALL_TIMEOUT=8
+    - GRADLE_OPTS="-Xmx512m"
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_b4c729f9df9b_key -iv $encrypted_b4c729f9df9b_iv
