@@ -92,6 +92,8 @@ dependencies {
     }
 
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+
+    testCompile 'junit:junit:4.12'
 }
 
 // get signing config from gradle.properties file
