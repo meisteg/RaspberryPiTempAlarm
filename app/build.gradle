@@ -76,6 +76,12 @@ ext {
     butterKnifeVersion = '8.4.0'
 }
 
+configurations.all {
+    resolutionStrategy {
+        force "com.android.support:support-annotations:$supportLibVersion"
+    }
+}
+
 dependencies {
     compile "com.android.support:appcompat-v7:$supportLibVersion"
     compile "com.android.support:design:$supportLibVersion"
