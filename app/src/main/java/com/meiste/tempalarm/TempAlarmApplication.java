@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatDelegate;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
+import com.squareup.leakcanary.LeakCanary;
 
 import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
@@ -35,6 +36,13 @@ public class TempAlarmApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // Do not init the app in this process.
+            return;
+        }
+        LeakCanary.install(this);
 
         if (BuildConfig.DEBUG) {
             // Logging setup
