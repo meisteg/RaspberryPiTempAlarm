@@ -71,7 +71,7 @@ android {
 }
 
 ext {
-    supportLibVersion = '25.1.0'
+    supportLibVersion = '25.3.0'
     googleFirebaseVersion = '10.0.1'
     butterKnifeVersion = '8.4.0'
 }
