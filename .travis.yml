@@ -1,43 +1,33 @@
 language: android
-
 dist: trusty
+sudo: false
 
 jdk:
- - oraclejdk8
+  - oraclejdk8
 
 android:
   components:
-    - tools
     - tools
     - platform-tools
     - build-tools-25.0.2
     - android-25
     - extra-google-m2repository
     - extra-android-m2repository
-    - android-19
-    - sys-img-armeabi-v7a-google_apis-19
-
-sudo: false
-
-env:
-  global:
-    - ADB_INSTALL_TIMEOUT=8
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_b4c729f9df9b_key -iv $encrypted_b4c729f9df9b_iv
-    -in app/google-services.json.enc -out app/google-services.json -d
+  # List component versions before install
+  - sdkmanager --list || true
 
 install:
+  - echo yes | sdkmanager "tools"
   - sdkmanager --list || true
 
 before_script:
-  - echo no | android create avd --force -n test -t android-19 --abi google_apis/armeabi-v7a
-  - emulator -avd test -no-window &
-  - android-wait-for-emulator
-  - adb shell 'while [[ -z $(getprop ro.runtime.firstboot) ]]; do sleep 2; done'
-  - adb shell settings put global window_animation_scale 0 &
-  - adb shell settings put global transition_animation_scale 0 &
-  - adb shell settings put global animator_duration_scale 0 &
+  - openssl aes-256-cbc -K $encrypted_b4c729f9df9b_key -iv $encrypted_b4c729f9df9b_iv
+    -in app/google-services.json.enc -out app/google-services.json -d
+
+script:
+  - ./gradlew build assembleAndroidTest
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
