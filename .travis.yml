@@ -35,4 +35,7 @@ before_cache:
 
 cache:
   directories:
-    - $HOME/.gradle
+    - $HOME/.gradle/appengine-sdk/
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache/
