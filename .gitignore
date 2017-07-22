@@ -12,7 +12,7 @@ build
 
 # Local configuration files (sdk path, etc)
 local.properties
-gradle.properties
+/app/gradle.properties
 
 # Android
 google-services.json
