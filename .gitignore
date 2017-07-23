@@ -25,3 +25,6 @@ google-services.json
 *.ipr
 *.iws
 .idea
+
+# Hardware
+target
