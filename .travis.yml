@@ -38,4 +38,3 @@ cache:
     - $HOME/.gradle/appengine-sdk/
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
-    - $HOME/.android/build-cache/
