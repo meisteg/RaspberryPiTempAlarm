@@ -22,7 +22,6 @@ def preDexEnabled = "true".equals(System.getProperty("pre-dex", "true"))
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
 
     defaultConfig {
         applicationId "com.meiste.tempalarm"
