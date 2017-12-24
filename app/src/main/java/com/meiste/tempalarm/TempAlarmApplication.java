@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatDelegate;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
+import com.meiste.tempalarm.util.NotificationHelper;
 import com.squareup.leakcanary.LeakCanary;
 
 import io.fabric.sdk.android.Fabric;
@@ -53,13 +54,13 @@ public class TempAlarmApplication extends Application {
             Timber.plant(new CrashlyticsTree());
         }
 
+        new NotificationHelper(this).initializeNotificationChannels();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         setDefaultNightMode();
 
         Timber.v("Application created");
     }
 
-    @SuppressWarnings("WrongConstant")
     private void setDefaultNightMode() {
         final SharedPreferences prefs =
                 PreferenceManager.getDefaultSharedPreferences(this);

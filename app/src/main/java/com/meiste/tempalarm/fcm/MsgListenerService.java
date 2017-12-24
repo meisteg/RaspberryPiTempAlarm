@@ -15,23 +15,17 @@
  */
 package com.meiste.tempalarm.fcm;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.meiste.tempalarm.AppConstants;
-import com.meiste.tempalarm.R;
 import com.meiste.tempalarm.ui.Alarm;
-import com.meiste.tempalarm.ui.CurrentTemp;
+import com.meiste.tempalarm.util.NotificationHelper;
 
 import timber.log.Timber;
 
@@ -45,32 +39,8 @@ public class MsgListenerService extends FirebaseMessagingService {
         if (isAlarmEnabled() && !isInCall()) {
             showAlarm();
         } else {
-            showNotification();
+            new NotificationHelper(this).showNotification();
         }
-    }
-
-    private void showNotification() {
-        final Intent intent = new Intent(this, CurrentTemp.class);
-        final PendingIntent pi = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        final String notifyText = getString(R.string.alarm_temp_out_range);
-        final Notification notification = new NotificationCompat.Builder(this)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(android.R.drawable.stat_sys_warning)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-                .setTicker(notifyText)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(notifyText)
-                .setContentIntent(pi)
-                .setAutoCancel(true)
-                .setShowWhen(true)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .build();
-
-        final NotificationManager nm =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(0, notification);
     }
 
     private void showAlarm() {
@@ -86,6 +56,6 @@ public class MsgListenerService extends FirebaseMessagingService {
 
     private boolean isInCall() {
         final TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        return tm.getCallState() != TelephonyManager.CALL_STATE_IDLE;
+        return (tm != null) && (tm.getCallState() != TelephonyManager.CALL_STATE_IDLE);
     }
 }

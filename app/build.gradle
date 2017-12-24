@@ -21,12 +21,12 @@ def isTravis = "true".equals(System.getenv("TRAVIS"))
 def preDexEnabled = "true".equals(System.getProperty("pre-dex", "true"))
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 27
 
     defaultConfig {
         applicationId "com.meiste.tempalarm"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 211
         versionName "2.1.1-" + gitSha
 
@@ -70,8 +70,8 @@ android {
 }
 
 ext {
-    supportLibVersion = '25.3.0'
-    googleFirebaseVersion = '10.0.1'
+    supportLibVersion = '27.0.2'
+    googleFirebaseVersion = '11.4.2'
     butterKnifeVersion = '8.5.1'
 }
 

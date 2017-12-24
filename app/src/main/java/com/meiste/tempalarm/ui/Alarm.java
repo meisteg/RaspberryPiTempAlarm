@@ -89,9 +89,9 @@ public class Alarm extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        final AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        final AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         // do not play alarms if stream volume is 0 (typically because ringer mode is silent).
-        if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) != 0) {
+        if ((am != null) && (am.getStreamVolume(AudioManager.STREAM_ALARM) != 0)) {
             final Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
@@ -116,7 +116,9 @@ public class Alarm extends AppCompatActivity {
         }
 
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        mVibrator.vibrate(sVibratePattern, 0);
+        if (mVibrator != null) {
+            mVibrator.vibrate(sVibratePattern, 0);
+        }
 
         mPlaying = true;
         mHandler.sendEmptyMessageDelayed(KILLER, ALARM_TIMEOUT);
@@ -137,7 +139,9 @@ public class Alarm extends AppCompatActivity {
             }
 
             // Stop vibrator
-            mVibrator.cancel();
+            if (mVibrator != null) {
+                mVibrator.cancel();
+            }
         }
         super.onPause();
     }

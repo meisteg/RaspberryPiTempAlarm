@@ -259,13 +259,15 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
         }
 
         final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        final Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (location == null) {
-            Timber.d("Requesting location");
-            lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
-        } else {
-            /* TODO: Need to check if location is too old? */
-            Timber.v(location.toString());
+        if (lm != null) {
+            final Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (location == null) {
+                Timber.d("Requesting location");
+                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
+            } else {
+                /* TODO: Need to check if location is too old? */
+                Timber.v(location.toString());
+            }
         }
     }
 
