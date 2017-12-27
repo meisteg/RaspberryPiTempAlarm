@@ -78,7 +78,7 @@ public class SensorAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public HeaderViewHolder(final View v, final LineGraphView lgv) {
             super(v);
 
-            final FrameLayout frameLayout = ButterKnife.findById(v, R.id.graph_placeholder);
+            final FrameLayout frameLayout = v.findViewById(R.id.graph_placeholder);
             frameLayout.addView(lgv);
         }
     }

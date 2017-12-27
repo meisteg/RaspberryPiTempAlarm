@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2014-2017 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 package com.meiste.tempalarm.ui;
 
 import android.content.Context;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.TaskStackBuilder;
@@ -104,7 +107,14 @@ public class Alarm extends AppCompatActivity {
                     return true;
                 }
             });
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                final AudioAttributes attr = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .build();
+                mMediaPlayer.setAudioAttributes(attr);
+            } else {
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+            }
             try {
                 mMediaPlayer.setDataSource(this, alert);
                 mMediaPlayer.setLooping(true);
@@ -117,7 +127,11 @@ public class Alarm extends AppCompatActivity {
 
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (mVibrator != null) {
-            mVibrator.vibrate(sVibratePattern, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mVibrator.vibrate(VibrationEffect.createWaveform(sVibratePattern, 0));
+            } else {
+                mVibrator.vibrate(sVibratePattern, 0);
+            }
         }
 
         mPlaying = true;
