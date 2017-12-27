@@ -27,8 +27,8 @@ android {
         applicationId "com.meiste.tempalarm"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 211
-        versionName "2.1.1-" + gitSha
+        versionCode 220
+        versionName "2.2.0-" + gitSha
 
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
