@@ -70,6 +70,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     private DatabaseReference mFirebase;
     private Snackbar mSnackbar;
     private int mNightMode;
+    private LocationManager mLocationManager;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -165,6 +166,12 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
             mFirebase = null;
         }
 
+        if (mLocationManager != null) {
+            Timber.v("Stopping location update");
+            mLocationManager.removeUpdates(this);
+            mLocationManager = null;
+        }
+
         /*
          * On a device rotation, there is no point disconnecting from Firebase
          * only to immediately have to reconnect.
@@ -258,12 +265,12 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
             return;
         }
 
-        final LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (lm != null) {
-            final Location location = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (mLocationManager != null) {
+            final Location location = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location == null) {
                 Timber.d("Requesting location");
-                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
+                mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
             } else {
                 /* TODO: Need to check if location is too old? */
                 Timber.v(location.toString());
@@ -274,6 +281,7 @@ public class CurrentTemp extends AppCompatActivity implements ValueEventListener
     @Override
     public void onLocationChanged(final Location location) {
         Timber.v(location.toString());
+        mLocationManager = null;
     }
 
     @Override
