@@ -33,3 +33,4 @@ target
 **/node_modules/*
 **/.firebaserc
 **/package-lock.json
+**/firebase-debug.log
