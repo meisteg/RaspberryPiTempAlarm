@@ -28,3 +28,8 @@ google-services.json
 
 # Hardware
 target
+
+# Firebase
+**/node_modules/*
+**/.firebaserc
+**/package-lock.json

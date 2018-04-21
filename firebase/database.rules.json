@@ -1,0 +1,11 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": "auth != null",
+    "shoptemps": {
+      ".indexOn": [
+        "timestamp"
+      ]
+    }
+  }
+}
