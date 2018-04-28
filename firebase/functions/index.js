@@ -18,6 +18,9 @@
 
 const functions = require('firebase-functions');
 
+// Cut off time. Child nodes older than this will be deleted.
+const CUT_OFF_TIME = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
+
 exports.sensorData = functions.https.onRequest((req, res) => {
   const data = req.query.data;
   if (data) {
@@ -28,4 +31,26 @@ exports.sensorData = functions.https.onRequest((req, res) => {
     console.error("data is empty!");
     res.send("data is empty!");
   }
+});
+
+/**
+ * This database triggered function will check for child nodes that are older than the
+ * cut-off time.
+ */
+exports.deleteOldTemps = functions.database.ref('/shoptemps/{tempId}').onCreate((snap) => {
+  const ref = snap.ref.parent; // reference to the parent
+  const now = Date.now();
+  const cutoff = now - CUT_OFF_TIME;
+  const oldItemsQuery = ref.orderByChild('timestamp').endAt(cutoff);
+  return oldItemsQuery.once('value').then((snapshot) => {
+    // create a map with all children that need to be removed
+    const updates = {};
+    snapshot.forEach(child => {
+      updates[child.key] = null;
+    });
+    console.info("deleting %d records", snapshot.numChildren());
+
+    // execute all updates in one go and return the result to end the function
+    return ref.update(updates);
+  });
 });
