@@ -24,7 +24,7 @@
       #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
       #temperature { text-align: center; font-size: 48px; }
       #humidity { text-align: center; font-size: 24px; }
-      .alarm_info { text-align: center; font-size: 14px; }
+      .alarm_info { text-align: center; font-size: 18px; }
       .alarm { display: block; background: #039be5; font-size: 22px; color: white; padding: 8px; border-radius: 4px; }
       @media (max-width: 600px) {
         body, #message { margin-top: 0; background: white; box-shadow: none; }
@@ -39,7 +39,8 @@
       <p id="temperature">N/A</p>
       <p id="humidity">N/A</p>
       <p class="alarm">Alarm Levels</p>
-      <p class="alarm_info">Coming soon!</p>
+      <p class="alarm_info">Low Temperature set to <span id="low">N/A</span></p>
+      <p class="alarm_info">High Temperature set to <span id="high">N/A</span></p>
     </div>
     <p id="load">Loading&hellip;</p>
 
@@ -53,6 +54,12 @@
             document.getElementById('temperature').innerHTML = `${snapshot.val().degF.toFixed(1)}&deg;F`;
             document.getElementById('humidity').innerHTML = `${snapshot.val().humidity.toFixed(1)}% humidity`;
             document.getElementById('load').innerHTML = '';
+          });
+
+          var thresRef = firebase.database().ref('settings');
+          thresRef.on('value', settings => {
+            document.getElementById('high').innerHTML = `${settings.val().thres_high}&deg;F`;
+            document.getElementById('low').innerHTML = `${settings.val().thres_low}&deg;F`;
           });
         } catch (e) {
           console.error(e);
