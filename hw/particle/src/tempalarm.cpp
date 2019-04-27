@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Gregory S. Meiste  <http://gregmeiste.com>
+ * Copyright (C) 2015-2019 Gregory S. Meiste  <http://gregmeiste.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-#include "Adafruit_DHT/Adafruit_DHT.h"
+#include <Adafruit_DHT.h>
 
-#define SERIAL             Serial1
+#define SERIAL             Serial   // USB port
+//#define SERIAL           Serial1  // TX/RX pins
 #define SERIAL_BAUD        115200
 
 #define DHT_PIN            D2
 #define DHT_TYPE           DHT22
 
-#define BUTTON_PIN         D1
-#define BUTTON_PRESS_MS    50
-
-#define LED_PIN            D7
-
 #define SENSOR_CHECK_MS    2000
 
 #define EEPROM_PROGRAM_KEY 0xA5A5A5A5
 #define EEPROM_REPORT_MS   60000
+
+#define MAX_READING_DELTA  5.0
 
 struct settingsEEPROM {
     unsigned int programmedKey;
@@ -44,10 +42,6 @@ union {
 
 double currentTempF = 0.0;
 double currentHumid = 0.0;
-
-bool isReporting = true;
-volatile unsigned long buttonPressMillis = 0;
-volatile unsigned long buttonReleaseMillis = 0;
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
@@ -77,77 +71,54 @@ static int setReportRate(String rate) {
         SERIAL.print(EEPROM_Data.settings.sensorReportMillis);
         SERIAL.print(" to ");
         SERIAL.println(sensorReportMillis);
-    
+
         EEPROM_Data.settings.sensorReportMillis = sensorReportMillis;
         writeEEPROM();
 
         return 0;
     }
-    
+
     SERIAL.println("New sensorReportMillis value is too small. Rejecting.");
     return -1;
 }
 
-static void buttonPress(void) {
-    buttonPressMillis = millis();
-    buttonReleaseMillis = 0;
-}
-
-static void checkStateChange(void) {
-    if (buttonPressMillis > 0) {
-        if (digitalRead(BUTTON_PIN) == HIGH) {
-            // False button press, ignore.
-            buttonPressMillis = 0;
-        } else if ((millis() - buttonPressMillis) >= BUTTON_PRESS_MS) {
-            // Button press debounced
-            if (isReporting) {
-                digitalWrite(LED_PIN, HIGH);
-                SERIAL.println("Reporting stopped!");
-                Spark.publish("sensorStopped");
-            } else {
-                digitalWrite(LED_PIN, LOW);
-                SERIAL.println("Reporting started!");
-            }
-            isReporting = !isReporting;
-            buttonPressMillis = 0;
-        }
-    } else if (!isReporting && (digitalRead(BUTTON_PIN) == HIGH)) {
-        if (buttonReleaseMillis > 0) {
-            if ((millis() - buttonReleaseMillis) >= BUTTON_PRESS_MS) {
-                SERIAL.println("Entering STOP mode");
-                delay(20);
-                Spark.sleep(BUTTON_PIN, FALLING);
-            }
-        } else {
-            buttonReleaseMillis = millis();
-        }
-    }
-}
-
 static void doMonitorIfTime(void) {
     static unsigned long lastReadingMillis = 0;
+    static bool haveValidReading = false;
     unsigned long now = millis();
 
     if ((now - lastReadingMillis) >= SENSOR_CHECK_MS) {
         float h = dht.getHumidity();
         float f = dht.getTempFarenheit();
 
-        // Check if any reads failed and exit early (to try again).
+        float delta_temp = f - currentTempF;
+
+        // Check if reading failed
         if (isnan(h) || isnan(f)) {
             SERIAL.println("Failed to read from DHT sensor!");
-            return;
         }
+        // Sanity check temperature read from sensor. If delta from previous
+        // reading is greater than MAX_READING_DELTA degrees, it probably is bogus.
+        else if (haveValidReading && (fabsf(delta_temp) > MAX_READING_DELTA)) {
+            SERIAL.print("Bad reading (");
+            SERIAL.print(f);
+            SERIAL.println(") from DHT sensor!");
+        }
+        // Reading is good, keep it
+        else {
+            currentHumid = h;
+            currentTempF = f;
 
-        currentHumid = h;
-        currentTempF = f;
+            SERIAL.print("Humid: ");
+            SERIAL.print(currentHumid);
+            SERIAL.print("% - ");
+            SERIAL.print("Temp: ");
+            SERIAL.print(currentTempF);
+            SERIAL.print("*F ");
+            SERIAL.println(Time.timeStr());
 
-        SERIAL.print("Humid: "); 
-        SERIAL.print(currentHumid);
-        SERIAL.print("% - ");
-        SERIAL.print("Temp: "); 
-        SERIAL.print(currentTempF);
-        SERIAL.print("*F ");
-        SERIAL.println(Time.timeStr());
+            haveValidReading = true;
+        }
 
         lastReadingMillis = now;
     }
@@ -161,10 +132,10 @@ static void doReportIfTime(void) {
 
     if (firstTime || ((now - lastReportMillis) >= EEPROM_Data.settings.sensorReportMillis)) {
         SERIAL.println("Reporting sensor data to server");
-        
+
         snprintf(publishString, sizeof(publishString), "{\"tempF\": %.1f, \"humid\": %.1f}", currentTempF, currentHumid);
-        Spark.publish("sensorData", publishString);
-        
+        Particle.publish("sensorData", publishString);
+
         lastReportMillis = now;
         firstTime = false;
     }
@@ -188,23 +159,13 @@ void setup(void) {
         writeEEPROM();
     }
 
-    pinMode(LED_PIN, OUTPUT);
+    Particle.variable("currentTempF", &currentTempF, DOUBLE);
+    Particle.variable("currentHumid", &currentHumid, DOUBLE);
 
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
-    attachInterrupt(BUTTON_PIN, buttonPress, FALLING);
-    
-    Spark.variable("currentTempF", &currentTempF, DOUBLE);
-    Spark.variable("currentHumid", &currentHumid, DOUBLE);
-    
-    Spark.function("reportRate", setReportRate);
+    Particle.function("reportRate", setReportRate);
 }
 
 void loop(void) {
-    checkStateChange();
-
-    if (isReporting) {
-        doMonitorIfTime();
-        doReportIfTime();
-    }
+    doMonitorIfTime();
+    doReportIfTime();
 }
-
